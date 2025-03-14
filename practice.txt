@@ -1,0 +1,19 @@
+//  Footer crud
+
+
+//fields 
+
+// policies Shipping Policy   Privacy policy   Refund Policy   Terms &  Conditions
+
+
+// Address     G10,White House, Greenlands Rd, Block II ,Kundanbagh Colony, Begumpet, Hyderabad, Telangana 500016
+
+// Follow us on  
+
+
+// Contact Us  +91-9023923902
+
+
+//logo
+
+

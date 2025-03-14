@@ -1,0 +1,10 @@
+node_modules
+**/node_modules
+*.code-workspace
+*.key
+**/*.key
+.vscode/
+*.yml
+*.css
+*.min.js
+build/

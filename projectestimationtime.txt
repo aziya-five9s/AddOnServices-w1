@@ -1,0 +1,123 @@
+server name:-    Addonservices
+Host name:- localhost
+Port: 5432
+password:-aziyafive9s
+Database:-postgres*************
+usename: postgres
+
+where  to store as of now local
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Backend :-
+
+setup----> 1 day
+
+Home page:-
+
+logo ka crud---> 1 day
+outlet crud----->1 day
+* login
+recommended menu image crud-----> 1day
+categories image------> 1 day
+location mapping--->city external api----->no estimation
+About crud with image----> 1 day
+our authentic flavours crud-----> 1 day
+basicDetails crud------> 1 day
+
+
+Contact Us:-
+crud with image-----> 1 day
+
+
+Store Locator :-
+linking with google map------>no estimation
+
+
+
+Order Now:-
+
+linking with home food
+adding loader
+-------> 1 day
+
+
+Gallery:-
+crud images---------> 1 day
+
+
+
+15 days 
+Buffer days----> 5 days
+-------------------------------------
+20 days
+
+
+
+UI sections:-
+-------------------------------------
+
+basic project setup--->1 day
+Header---->2 days
+basicDetails----->2 days
+
+
+homepage:-
+
+5 components----->7 days
+-----------------------------------------
+
+logo ka crud---> 1 day
+outlet crud----->1 day
+
+recommended menu image crud-----> 1day
+categories image------> 1 day
+location mapping--->city external api----->no estimation
+About crud with image----> 1 day
+our authentic flavours crud-----> 1 day
+basicDetails crud------> 1 day
+-----------------------------------------------
+
+
+
+
+
+
+Contact Us:-
+
+image
+
+fields
+----------> 2 days
+
+Store Locator:-
+
+mapping component location ka------>no estimation
+
+order now:-
+
+loader component---->1 day
+
+
+Gallery:-
+
+image component-------> 1 day
+
+
+without responsive only 
+
+
+20 days
+buffer 5 days
+-----------------------------------25 days
+
+
+
+
+
+
+
+
+
+
+
+
+

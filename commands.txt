@@ -1,0 +1,61 @@
+
+node -v---->v20.18.0
+npm -v------>10.8.2
+pgAdmin version------->9.0
+To know PostgreSQL version------>SELECT version();---->in pgadmin-->PostgreSQL 17.4 on x86_64-windows, compiled by msvc-19.42.34436, 64-bit
+
+
+
+npm init -y
+
+npm install express dotenv cors
+npm install --save-dev nodemon
+
+git init
+
+npm i typeorm
+npm i typescript
+npm i multer
+npm i @types/node
+npm i @types/express
+ npm i @types/cors 
+ npm i ts-node
+ npm i @types/morgan
+
+
+
+Running codes:-
+------------------
+ npx tsc-------> for running build code
+ npm run start-------> for running code
+
+
+
+entity--->Schema
+
+
+
+if we do any changes/create in collection -----> then below 2 commands.
+1) npm run migration:generate------>migration created---->file also came
+2) npm run migration:run --------->created file runs
+
+
+steps to follow:-
+1)entity
+
+2) add entity in data-source
+
+3) migration
+
+5) index.ts---->
+
+4) router
+
+5) controller
+
+6) npx tsc
+
+7) npm run start
+
+
+
