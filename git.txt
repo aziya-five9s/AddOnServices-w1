@@ -1,0 +1,27 @@
+main
+
+repo 
+git init
+git remote add origin link
+git add .
+git commit -m ""
+git push
+
+dev
+
+git checkout -b dev----> new branch
+git remote add dev link--->main link
+git add .
+git commit -m ""
+git push
+
+git checkout main----> going to main branch
+
+git merge dev--------> which branch is forward/updated give that branch name
+
+
+
+
+
+
+

@@ -6,8 +6,9 @@ import { Request, Response } from "express"
 import cors from "cors"
 import path from "path"
 import "reflect-metadata"
-import { basicDetailsRouter } from "./routes/basicdetails.routes"
-import { heroSectionRouter } from "./routes/herosection.routes"
+import { TenantInfoRouter } from "./routes/TenantInfo.routes"
+import { heroSectionRouter } from "./routes/heroSection.routes"
+import {  chefMenuRouter } from "./routes/chefMenu.routes"
 
 dotenv.config()
 
@@ -18,8 +19,9 @@ app.use(morgan("dev"))
 app.use(cors())
 
 
-app.use("/api/basicDetails", basicDetailsRouter)
-app.use("/api/heroSection", heroSectionRouter)
+app.use("/api/tenant", TenantInfoRouter)
+app.use("/api/herosection", heroSectionRouter)
+app.use("/api/chefmenu", chefMenuRouter)
 
 
 app.get("*", (req: Request, res: Response) => {

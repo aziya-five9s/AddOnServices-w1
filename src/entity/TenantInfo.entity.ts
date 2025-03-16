@@ -9,8 +9,8 @@ import {
 } from "typeorm"
 // import { EmissionStandardEnum } from "../../../enum/emissionStandard.enum"
 
-@Entity({ name: "BasicDetails" })//table got created
-export class BasicDetails extends BaseEntity {
+@Entity({ name: "TenantInfo" })//table got created
+export class TenantInfo extends BaseEntity {
     @PrimaryGeneratedColumn("uuid")
     id: string
 
@@ -18,7 +18,10 @@ export class BasicDetails extends BaseEntity {
     address: string
 
     @Column({})//mandatory
-    userId: string
+    tenantId: string
+
+    @Column({ nullable: true })
+    tenantName: string
 
     @Column({})//mandatory
     contactUs: string
@@ -46,7 +49,7 @@ export class BasicDetails extends BaseEntity {
     // @Column("jsonb", { nullable: true }) 
     // heroSection: { sNo: number, title: string; subTitle: string; imagePath: string, imgId: string , updatedAt: Date}[]
     
-    @Column("jsonb", { nullable: true })
+    @Column("jsonb", { nullable: true })//if nothing saved null will be saved
     heroSection?: Array<{ title: string; subTitle: string; imagePath: string, imgId: string , updatedAt: Date }> | null
 
     @CreateDateColumn()

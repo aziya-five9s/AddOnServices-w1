@@ -1,14 +1,14 @@
 // import * as express from "express"
 import express from "express";
-import {basicDetailsController} from "../controllers/basicdetails.controller"
+import {TenantInfoController} from "../controllers/TenantInfo.controller"
 
 const Router = express.Router()
 
 
-Router.post("/create",basicDetailsController.addHeroSectionData)
-Router.delete("/delete/:userId/:id",basicDetailsController.deleteHeroSectionData)
-Router.route("/get/:userId/:id?").get(basicDetailsController.getHeroSectionData)
-Router.route("/update/:id?").put(basicDetailsController.updateHeroSectionData);
+Router.post("/create",TenantInfoController.addHeroSectionData)
+Router.delete("/delete/:tenantId/:id",TenantInfoController.deleteHeroSectionData)
+Router.route("/get/:tenantId/:id?").get(TenantInfoController.getHeroSectionData)
+Router.route("/update/:id").put(TenantInfoController.updateHeroSectionData);
 
 export { Router as heroSectionRouter }
 

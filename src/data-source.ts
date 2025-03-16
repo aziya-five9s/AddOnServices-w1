@@ -3,7 +3,8 @@ import { DataSource } from "typeorm"
 import * as path from "path"
 import * as dotenv from "dotenv"
 
-import { BasicDetails } from "./entity/basicdetails.entity"
+import { TenantInfo } from "./entity/TenantInfo.entity"
+import { ChefMenu } from "./entity/chefMenu.entity"
 
 dotenv.config()
 
@@ -19,7 +20,8 @@ export const AppDataSource = new DataSource({
     synchronize: false,
     logging: false,
     entities: [
-        BasicDetails
+        TenantInfo,
+        ChefMenu
     ],
     migrations: [path.join(__dirname, "./migrations/*")],
     subscribers: [],
