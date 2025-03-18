@@ -6,7 +6,10 @@ import {
     UpdateDateColumn,
     BaseEntity,
     DeleteDateColumn,
+    OneToMany,
+    JoinColumn,
 } from "typeorm"
+import { SubMenu } from "./SubMenu.entity"
 // import { EmissionStandardEnum } from "../../../enum/emissionStandard.enum"
 
 @Entity({ name: "TenantInfo" })//table got created
@@ -51,6 +54,22 @@ export class TenantInfo extends BaseEntity {
     
     @Column("jsonb", { nullable: true })//if nothing saved null will be saved
     heroSection?: Array<{ title: string; subTitle: string; imagePath: string, imgId: string , updatedAt: Date }> | null
+
+
+    @Column("jsonb", { nullable: true })
+    aboutSection: {
+        description:String;
+        imagePath: string; 
+        imgId: string ;
+        uploadedBy: string;
+        uploadedAt: Date;
+    };
+
+
+    //one tenant info to many sub menu's
+    // @OneToMany(() => SubMenu, (el) => el.subMenu)
+    // @JoinColumn({ name: "subMenu" })
+    // subMenu: SubMenu[]
 
     @CreateDateColumn()
     createdAt: Date

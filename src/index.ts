@@ -9,6 +9,8 @@ import "reflect-metadata"
 import { TenantInfoRouter } from "./routes/TenantInfo.routes"
 import { heroSectionRouter } from "./routes/heroSection.routes"
 import {  chefMenuRouter } from "./routes/chefMenu.routes"
+import {aboutSectionRouter} from "./routes/AboutSection.routes"
+import {subMenuRouter} from "./routes/SubMenu.routes"
 
 dotenv.config()
 
@@ -22,6 +24,8 @@ app.use(cors())
 app.use("/api/tenant", TenantInfoRouter)
 app.use("/api/herosection", heroSectionRouter)
 app.use("/api/chefmenu", chefMenuRouter)
+app.use("/api/aboutsection", aboutSectionRouter)
+app.use("/api/submenu", subMenuRouter)
 
 
 app.get("*", (req: Request, res: Response) => {

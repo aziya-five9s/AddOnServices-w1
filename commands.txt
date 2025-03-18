@@ -58,4 +58,8 @@ steps to follow:-
 7) npm run start
 
 
+join:-
+ //relations----> means we get the overall data of tenant which was use for join
+            //select=--> we use to show fields (i require few fields i take that in select)
+            const subMenuData = await repo.find({ where: { ...req.query}, relations:["tenant"], select:["heading", "subMenu"] });
 

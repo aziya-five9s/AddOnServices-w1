@@ -6,9 +6,14 @@ const Router = express.Router()
 
 
 Router.post("/create",TenantInfoController.addHeroSectionData)
-Router.delete("/delete/:tenantId/:id",TenantInfoController.deleteHeroSectionData)
+Router.delete("/delete/:id/:imgid",TenantInfoController.deleteHeroSectionData)
 Router.route("/get/:tenantId/:id?").get(TenantInfoController.getHeroSectionData)
+
+
 Router.route("/update/:id").put(TenantInfoController.updateHeroSectionData);
+
+//doubt
+// Router.route("/update/:tenantId/:id").put(TenantInfoController.updateHeroSectionData);
 
 export { Router as heroSectionRouter }
 
