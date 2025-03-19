@@ -11,6 +11,7 @@ import { heroSectionRouter } from "./routes/heroSection.routes"
 import {  chefMenuRouter } from "./routes/chefMenu.routes"
 import {aboutSectionRouter} from "./routes/AboutSection.routes"
 import {subMenuRouter} from "./routes/SubMenu.routes"
+import { contactUsRouter } from "./routes/ContactUs.routes"
 
 dotenv.config()
 
@@ -26,6 +27,7 @@ app.use("/api/herosection", heroSectionRouter)
 app.use("/api/chefmenu", chefMenuRouter)
 app.use("/api/aboutsection", aboutSectionRouter)
 app.use("/api/submenu", subMenuRouter)
+app.use("/api/contactus", contactUsRouter)
 
 
 app.get("*", (req: Request, res: Response) => {

@@ -51,6 +51,57 @@ export class CommonController {
         }
     }
 
+
+    static async uploadDocuments(req, res) {
+        try {
+            const UPLOAD_DIR = path.resolve(__dirname, "../../src/public/uploads");
+
+            // Ensure the upload directory exists
+            if (!fs.existsSync(UPLOAD_DIR)) {
+                fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+            }
+
+            // Configure Multer storage
+            const storage = multer.diskStorage({
+                destination: (req, file, cb) => cb(null, UPLOAD_DIR),
+                filename: (req, file, cb) => {
+                    const docId = uuidv4();
+                    const ext = path.extname(file.originalname);
+                    cb(null, `${docId}${ext}`);
+                },
+            });
+
+            const upload = multer({ storage }).array("file", 4); // Allows up to 5 files
+
+            // Promisify the multer upload function
+            const uploadAsync = util.promisify(upload);
+
+            // Execute the file upload
+            await uploadAsync(req, res);
+
+            // Check if files were uploaded
+            if (!req.files || req.files.length === 0) {
+                return { status: false, message: "No files uploaded" };
+            }
+
+            // Process uploaded files
+            const uploadedFiles = (req.files as Express.Multer.File[]).map((file) => {
+                const relativeFilePath = path.relative(UPLOAD_DIR, file.path);
+                return {
+                    docId: path.parse(file.filename).name, // Extract docId from filename
+                    fpath: `/uploads/${relativeFilePath.replace(/\\/g, "/")}`, // Normalize path
+                };
+            });
+
+            return { status: true, files: uploadedFiles };
+        } catch (error) {
+            return {
+                status: false,
+                message: error.message || "Something went wrong while uploading the documents",
+            };
+        }
+    }
+
     // static async uploadDocument(req) {
     //     try {
 

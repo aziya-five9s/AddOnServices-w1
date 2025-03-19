@@ -6,6 +6,7 @@ import * as dotenv from "dotenv"
 import { TenantInfo } from "./entity/TenantInfo.entity"
 import { ChefMenu } from "./entity/chefMenu.entity"
 import { SubMenu } from "./entity/SubMenu.entity"
+import { ContactUs } from "./entity/ContactUs.entity"
 
 dotenv.config()
 
@@ -23,7 +24,8 @@ export const AppDataSource = new DataSource({
     entities: [
         TenantInfo,
         ChefMenu,
-        SubMenu
+        SubMenu,
+        ContactUs
     ],
     migrations: [path.join(__dirname, "./migrations/*")],
     subscribers: [],

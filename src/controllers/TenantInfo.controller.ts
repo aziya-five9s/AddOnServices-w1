@@ -202,12 +202,17 @@ export class TenantInfoController {
     static async addHeroSectionData(req: Request, res: Response) {
         try {
             // const { title, subTitle, userId } = req.body
+
+         
+            const tenantId=req.params.tenantId
             const filePath = await CommonController.uploadDocument(req, res)
             if (!filePath || filePath.status === false) {
                 return res.status(400).json({ success: false, message: "No file uploaded!" })
             }
 
-            const ChefDetails = await TenantInfo.findOne({ where: { tenantId: req.body.tenantId } })
+            // const ChefDetails = await TenantInfo.findOne({ where: { tenantId: req.body.tenantId } })
+          
+            const ChefDetails = await TenantInfo.findOne({ where: { tenantId: tenantId } })
             ChefDetails.heroSection = [
                 ...(ChefDetails.heroSection || []),
                 {
@@ -348,8 +353,6 @@ export class TenantInfoController {
                 uploadedBy: userData.userName,
                 uploadedAt: new Date()
             },
-
-
                 await AboutSectionDetails.save()
             return res.status(200).json({
                 success: true, message: "Data Saved Successfully"
@@ -379,6 +382,34 @@ export class TenantInfoController {
             });
         }
     }
+
+    static async getAboutSectionData(req: Request, res: Response) {
+        try {
+            const  id  = req.params.id;
+    
+            // Find the tenant information by tenantId
+            const tenantInfo = await TenantInfo.findOne({ where: { id } });
+    
+            if (!tenantInfo) {
+                return res.status(404).json({ success: false, message: "Tenant not found!" });
+            }
+    
+            // Extract the aboutSection field
+            return res.status(200).json({
+                success: true,
+                message: "About section retrieved successfully",
+                aboutSection: tenantInfo.aboutSection || {},
+            });
+        } catch (error) {
+            return res.status(500).json({
+                success: false,
+                message: error instanceof Error ? error.message : "An unknown error occurred",
+            });
+        }
+    }
+    
+
+
 
 
     //---------------------------------------About Section End----------------------------------------
