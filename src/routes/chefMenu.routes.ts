@@ -1,6 +1,6 @@
 // import * as express from "express"
 import express from "express";
-import {ChefMenuController} from "../controllers/chefMenu.controller"
+import {ChefMenuController} from "../controllers/ChefMenu.controller"
 
 const Router = express.Router()
 

@@ -7,16 +7,19 @@ import cors from "cors"
 import path from "path"
 import "reflect-metadata"
 import { TenantInfoRouter } from "./routes/TenantInfo.routes"
-import { heroSectionRouter } from "./routes/heroSection.routes"
-import {  chefMenuRouter } from "./routes/chefMenu.routes"
+import { heroSectionRouter } from "./routes/herosection.routes"
+import {  chefMenuRouter } from "./routes/ChefMenu.routes"
 import {aboutSectionRouter} from "./routes/AboutSection.routes"
 import {subMenuRouter} from "./routes/SubMenu.routes"
 import { contactUsRouter } from "./routes/ContactUs.routes"
+import bodyParser from "body-parser"
+import { galleryRouter } from "./routes/GallerySection.routes"
 
 dotenv.config()
 
 const app = express()
 app.use(express.json())
+app.use(express.urlencoded({ extended: true }));
 const { PORT = 3000 } = process.env
 app.use(morgan("dev"))
 app.use(cors())
@@ -28,6 +31,11 @@ app.use("/api/chefmenu", chefMenuRouter)
 app.use("/api/aboutsection", aboutSectionRouter)
 app.use("/api/submenu", subMenuRouter)
 app.use("/api/contactus", contactUsRouter)
+app.use("/api/gallery", galleryRouter)
+
+
+// app.use(bodyParser.json());
+// app.use(bodyParser.urlencoded({ extended: true }));
 
 
 app.get("*", (req: Request, res: Response) => {

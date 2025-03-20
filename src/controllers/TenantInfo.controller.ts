@@ -6,12 +6,60 @@ import { AppDataSource } from "../data-source"
 import { TenantInfo } from "../entity/TenantInfo.entity"
 import { AnyObject } from "../types/common"
 import { CommonController } from "./common.controller"
+import { Raw } from "typeorm"
 
 const userData = { tenantId: "tenant-001", userId: "user-001", userName: "John Doe", userEmail: "johndoe@email.com" }
 export class TenantInfoController {
 
 
     //---------------------------------------Footer,Header Sections start--------------------------------------
+  
+  //not working check
+    // static async postTenantInfoData(req: Request, res: Response) {
+    //     try {
+    //         const { address, contactUs, policies, followUsOn, changeoutlet } = req.body
+    //         const tenantName=req.body.tenantName
+
+    //         // const isExistingTenant = await TenantInfo.findOne({
+    //         //     where: { tenantName: Raw((alias) => `LOWER(${alias}) = LOWER(:tenantName)`, { tenantName }) },
+    //         // });
+    //         // if (isExistingTenant) {
+    //         //     return res.status(409).json({
+    //         //         success: false,
+    //         //         message: 'This Tenant Name Already Exists',
+    //         //     });
+    //         // }
+
+            
+    //         const filePath = await CommonController.uploadDocument(req, res)
+    //         if (!filePath || filePath.status === false) {
+    //             return res.status(400).json({ success: false, message: "No file uploaded!" })
+    //         }
+    //         const TenantInfoData = new TenantInfo()
+            
+    //         TenantInfoData.address = address
+    //         TenantInfoData.tenantId = userData.tenantId
+    //         TenantInfoData.tenantName = tenantName
+    //         TenantInfoData.contactUs = contactUs
+    //         TenantInfoData.policies = JSON.parse(policies)
+    //         TenantInfoData.followUsOn = JSON.parse(followUsOn)
+    //         TenantInfoData.logo = { docId: filePath.docId, docPath: filePath.fpath, uploadedAt: new Date(), uploadedBy: userData.userName }
+    //         TenantInfoData.changeoutlet = JSON.parse(changeoutlet)
+    //         await TenantInfoData.save()
+    //         req.logo = filePath.fpath
+    //         return res.status(200).json({
+    //             success: true, message: "Data Saved Successfully"
+    //         })
+    //     }
+    //     catch (error) {
+    //         return res.status(500).json({
+    //             success: false,
+    //             message: (error as Error).message
+    //         })
+    //     }
+    // }
+
+
     static async postTenantInfoData(req: Request, res: Response) {
         try {
             const filePath = await CommonController.uploadDocument(req, res)

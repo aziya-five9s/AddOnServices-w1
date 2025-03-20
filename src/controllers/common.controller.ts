@@ -40,7 +40,7 @@ export class CommonController {
 
             const newFilePath = req.file.path;
             const relativeFilePath = path.relative(UPLOAD_DIR, newFilePath); // => /docid.png
-            const normalizedRelativePath = `/uploads/${relativeFilePath.replace(/\\/g, "/")}`; // => /uploads/docid.png
+            // const normalizedRelativePath = `/uploads/${relativeFilePath.replace(/\\/g, "/")}`; // => /uploads/docid.png
 
             return { status: true, fpath: relativeFilePath, docId };
         } catch (error) {
@@ -89,7 +89,8 @@ export class CommonController {
                 const relativeFilePath = path.relative(UPLOAD_DIR, file.path);
                 return {
                     docId: path.parse(file.filename).name, // Extract docId from filename
-                    fpath: `/uploads/${relativeFilePath.replace(/\\/g, "/")}`, // Normalize path
+                    // fpath: `/uploads/${relativeFilePath.replace(/\\/g, "/")}`, // Normalize path
+                    fpath: `${relativeFilePath.replace(/\\/g, "/")}`, // Normalize path
                 };
             });
 
