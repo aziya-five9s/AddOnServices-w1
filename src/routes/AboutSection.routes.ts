@@ -6,10 +6,7 @@ const Router = express.Router()
 
 Router.post("/create/:id",TenantInfoController.addUpdateAboutSectionData)
 Router.delete("/delete/:id",TenantInfoController.deleteAboutSectionData)
-
-
 Router.route("/get/:id").get(TenantInfoController.getAboutSectionData)
-// Router.route("/update/:id").put(TenantInfoController.updateAboutSectionData);
 
 export { Router as aboutSectionRouter }
 

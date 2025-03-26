@@ -27,8 +27,6 @@ export class ContactUs extends BaseEntity {
     email: string
 
 
-    // @Column("text",{ array: true, nullable: true })
-    // contact?: string[] | null;
 
     @Column("jsonb", { nullable: true }) // Works in PostgreSQL & MySQL
     contact?: string[] | null;
@@ -38,24 +36,6 @@ export class ContactUs extends BaseEntity {
         imagePath: string, imgId: string, updatedAt: Date,
         uploadedBy: string
     }> | null
-
-
-    //     description: string
-    // address:string
-    // email:string
-    // contact:[] //multiple contacts
-    // images:[{imgId:"",imagePath:"", ....}] ==>check array length before pushing(max 4)
-    // ....
-
-
-
-    // @Column("jsonb", { nullable: true })
-    // logo: {
-    //     docId: string;
-    //     docPath: string;
-    //     uploadedBy: string;
-    //     uploadedAt: Date;
-    // };
 
     @CreateDateColumn()
     createdAt: Date

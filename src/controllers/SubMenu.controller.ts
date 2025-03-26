@@ -1,29 +1,33 @@
 import { Request, Response } from "express"
-// import moment from "moment"
-// import { z, ZodError } from "zod"
-// // import { v4 as uuidv4 } from "uuid"
 import { AppDataSource } from "../data-source"
 import { SubMenu } from "../entity/SubMenu.entity"
 import { AnyObject } from "../types/common"
 import { CommonController } from "./common.controller"
 import { TenantInfo } from "../entity/TenantInfo.entity"
+import { Raw } from "typeorm"
 
 const userData = { tenantId: "tenant-001", userId: "user-001", userName: "John Doe", userEmail: "johndoe@email.com" }
-export class SubMenuController { 
+export class SubMenuController {
 
-    static async postSubMenuData(req: Request, res: Response) {
+    //------------------------------------------Our Authentic Flavours Section Start------------------------------------------
+    static async postSubMenuData1(req: Request, res: Response) {
         try {
             const filePath = await CommonController.uploadDocument(req, res)
             if (!filePath || filePath.status === false) {
                 return res.status(400).json({ success: false, message: "No file uploaded!" })
             }
-            const { heading, tenantId } = req.body
-            const tenantinfo = await TenantInfo.findOne({where: {tenantId}})
+            const { heading, tenantId, tenantName } = req.body
+            const tenantinfo = await TenantInfo.findOne({ where: { tenantId } })
+            if (!tenantinfo) {
+                return res.status(404).json({
+                    success: false, message: "Tenant Not Found"
+                })
+            }
+            const submenuinfo = await SubMenu.findOne({ where: { tenantId } })
             const subMenuData = new SubMenu()
-            // subMenuData.tenantId = userData.tenantId
             subMenuData.heading = heading
-            subMenuData.tenant = tenantinfo
-            subMenuData.tenantId =req.body.tenantId
+            subMenuData.tenantId = req.body.tenantId
+            subMenuData.tenantId = tenantId
             if (subMenuData.subMenu == null) {
                 subMenuData.subMenu = []
             }
@@ -42,6 +46,69 @@ export class SubMenuController {
         }
     }
 
+    static async postSubMenuData(req: Request, res: Response) {
+        try {
+            const filePath = await CommonController.uploadDocument(req, res);
+            if (!filePath || filePath.status === false) {
+                return res.status(400).json({ success: false, message: "No file uploaded!" });
+            }
+
+            const { heading, tenantId, tenantName, title } = req.body;
+
+            // Check if tenant exists
+            const tenantInfo = await TenantInfo.findOne({ where: { tenantId } });
+
+            if (!tenantInfo) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Tenant Not Found"
+                });
+            }
+
+            // Check if submenu already exists for the tenant
+            let subMenuInfo = await SubMenu.findOne({ where: { tenantId } });
+
+            if (!subMenuInfo) {
+                // If no submenu exists, create a new one
+                subMenuInfo = new SubMenu();
+                subMenuInfo.tenantId = tenantId;
+                subMenuInfo.heading = heading;
+                subMenuInfo.subMenu = []; // Initialize subMenu array
+            }
+            else {
+                if (heading && heading.trim() !== "") {
+                    subMenuInfo.heading = heading;
+                }
+            }
+            if (filePath && filePath.status == true) {
+                // Append new submenu entry
+                subMenuInfo.subMenu.push({
+                    title,
+                    imagePath: filePath.fpath,
+                    imgId: filePath.docId,
+                    updatedAt: new Date(),
+                    uploadedBy: userData.userName
+                });
+            }
+
+            // Save the updated submenu
+            await subMenuInfo.save();
+
+            return res.status(200).json({
+                success: true,
+                message: subMenuInfo?.id ? "Submenu updated successfully" : "New submenu created successfully",
+                data: subMenuInfo
+            });
+
+        } catch (error) {
+            return res.status(500).json({
+                success: false,
+                message: (error as Error).message
+            });
+        }
+    }
+
+
     static async getSubMenuData(req: Request, res: Response) {
         try {
             const repo = AppDataSource.getRepository(SubMenu)
@@ -50,7 +117,7 @@ export class SubMenuController {
             //relations----> means we get the overall data of tenant which was use for join
             //select=--> we use to show fields (i require few fields i take that in select)
             // const subMenuData = await repo.find({ where: { ...req.query}, relations:["tenant"], select:["heading", "subMenu"] });
-            const subMenuData = await repo.find({ where: { ...req.query}, relations:["tenant"] });
+            const subMenuData = await repo.find({ where: { ...req.query }, relations: ["tenant"] });
             return res.status(200).json({
                 success: true,
                 data: subMenuData
@@ -79,9 +146,9 @@ export class SubMenuController {
 
     static async updateSubMenuData(req: Request, res: Response) {
         try {
-            const { heading,tenantId } = req.body
             const filePath = await CommonController.uploadDocument(req, res)
             const repo = AppDataSource.getRepository(SubMenu);
+            const { heading, tenantId,imgId } = req.body
             const { id } = req.params; // Extract the basicDetails ID from request parameters
             if (!id) {
                 return res.status(404).json({
@@ -89,19 +156,23 @@ export class SubMenuController {
                     message: "Id not found",
                 });
             }
-            const tenantinfo = await TenantInfo.findOne({where: {tenantId}})
+            const tenantinfo = await TenantInfo.findOne({ where: { tenantId } })
             // Check if the basicDetails record exists
             const existingSubMenuDetails = await repo.findOne({ where: { id } });
+
             if (!existingSubMenuDetails) {
                 return res.status(404).json({
                     success: false,
                     message: "SubMenu data not found",
                 });
-               
+
             }
-            if (filePath && filePath.status == true) {
-                existingSubMenuDetails.subMenu =[{ title: req.body.title, imagePath: filePath.fpath, imgId: filePath.docId, updatedAt: new Date(), uploadedBy: userData.userName }]
+            const imageInfo = existingSubMenuDetails.subMenu.find((el)=>el.imgId==imgId)
+
+            if (imageInfo && filePath && filePath.status == true) {
+                existingSubMenuDetails.subMenu = [{ title: req.body.title, imagePath: filePath.fpath, imgId: filePath.docId, updatedAt: new Date(), uploadedBy: userData.userName }]
             }
+
             existingSubMenuDetails.heading = req.body.heading
             existingSubMenuDetails.tenant = tenantinfo
 

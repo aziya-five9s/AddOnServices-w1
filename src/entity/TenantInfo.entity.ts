@@ -48,9 +48,6 @@ export class TenantInfo extends BaseEntity {
         latitude: number;
         longitude: number;
     };
-
-    // @Column("jsonb", { nullable: true }) 
-    // heroSection: { sNo: number, title: string; subTitle: string; imagePath: string, imgId: string , updatedAt: Date}[]
     
     @Column("jsonb", { nullable: true })//if nothing saved null will be saved
     heroSection?: Array<{ title: string; subTitle: string; imagePath: string, imgId: string , updatedAt: Date }> | null
@@ -58,6 +55,7 @@ export class TenantInfo extends BaseEntity {
 
     @Column("jsonb", { nullable: true })
     aboutSection: {
+        title:string;
         description:String;
         imagePath: string; 
         imgId: string ;

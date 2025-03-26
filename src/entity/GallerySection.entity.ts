@@ -7,7 +7,6 @@ import {
     BaseEntity,
     DeleteDateColumn,
 } from "typeorm"
-// import { EmissionStandardEnum } from "../../../enum/emissionStandard.enum"
 
 @Entity({ name: "Gallery" })
 export class Gallery extends BaseEntity {
@@ -17,11 +16,7 @@ export class Gallery extends BaseEntity {
     @Column({}) //mandatory
     tenantId: string;
 
-    // @Column({ nullable: true })
-    // tenantName: string;
-
-    // @Column({ nullable: true })
-    // meals: string;
+   
 
     @Column("jsonb", { nullable: true })
     morningMeal?: Array<{

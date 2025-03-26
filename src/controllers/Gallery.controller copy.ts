@@ -1,9 +1,11 @@
 import { Request, Response } from "express"
+// import moment from "moment"
+// import { z, ZodError } from "zod"
+// // import { v4 as uuidv4 } from "uuid"
 import { AppDataSource } from "../data-source"
 import { AnyObject } from "../types/common"
 import { CommonController } from "./common.controller"
 import { Gallery } from "../entity/GallerySection.entity"
-import { TenantInfo } from "../entity/TenantInfo.entity"
 
 const userData = { tenantId: "tenant-001", userId: "user-001", userName: "John Doe", userEmail: "johndoe@email.com" }
 export class GalleryController {
@@ -16,17 +18,8 @@ export class GalleryController {
             if (!filePath || filePath.status === false) {
                 return res.status(400).json({ success: false, message: "No file uploaded!" });
             }
-
-            const { tenantId, meals } = req.body;
-            const tenantinfo = await TenantInfo.findOne({ where: { tenantId } })
-
-            if (!tenantinfo) {
-                return res.status(404).json({
-                    success: false, message: "Tenant Not Found"
-                })
-            }
-
             const repo = new Gallery()
+            const { tenantId, meals } = req.body;
 
             // Format uploaded images
             const uploadedImages = filePath.files.map((file, index) => ({
@@ -80,12 +73,70 @@ export class GalleryController {
         }
     }
 
+    // static async updateContactUsData(req: Request, res: Response) {
+    //     try {
+    //         const { id } = req.params; // Extract the basicDetails ID from request parameters
+    //         const { description, address, email, contact, images, tenantId } = req.body
+    //         const repo = AppDataSource.getRepository(ContactUs);
+    //         const existingContactUsDetails = await repo.findOne({ where: { id } });
+    //         if (!existingContactUsDetails) {
+    //             return res.status(404).json({
+    //                 success: false,
+    //                 message: "ContactUs data not found",
+    //             });
+    //         }
+    //         if (existingContactUsDetails.images.length <= 4) {
+    //             // const filePath = await CommonController.uploadDocument(req, res)
+    //             const filePath = await CommonController.uploadDocuments(req, res)
+    //             if (filePath && filePath.status == true) {
+    //                 // existingContactUsDetails.images = [{ imagePath: filePath.fpath, imgId: filePath.docId, updatedAt: new Date(), uploadedBy: userData.userName }]
+    //             }
+    //         }
+    //         else{
+    //             return res.status(400).json({
+    //                 success: false,
+    //                 message: "Number of uploaded images exceeds the maximum limit",
+    //             });
+    //         }
+
+    //         if (!id) {
+    //             return res.status(404).json({
+    //                 success: false,
+    //                 message: "Id not found",
+    //             });
+    //         }
+    //         // const tenantinfo = await TenantInfo.findOne({ where: { tenantId } })
+    //         // Check if the basicDetails record exists
+    //         if (req.body.description !== undefined) existingContactUsDetails.description = req.body.description;
+    //         if (req.body.address !== undefined) existingContactUsDetails.address = req.body.address;
+    //         if (req.body.email !== undefined) existingContactUsDetails.email = req.body.email;
+    //         if (req.body.contact !== undefined) existingContactUsDetails.contact = JSON.parse(req.body.contact);
+
+    //         await existingContactUsDetails.save()
+    //         return res.status(200).json({
+    //             success: true,
+    //             message: "ContactUs data updated successfully",
+    //             data: existingContactUsDetails,
+    //         });
+    //     }
+    //     catch (error) {
+    //         return res.status(500).json({
+    //             success: false,
+    //             message: error instanceof Error ? error.message : "An unknown error occurred",
+    //         });
+    //     }
+    // }
+
+
     static async updateGalleryData(req: Request, res: Response) {
         try {
             const { id } = req.params;
+            // const datatitle=req.body.title
 
             const title = req.body?.title ? JSON.parse(req.body.title) : []
-           const { morningMeal, afternoonMeal, eveningMeal } = req.body;
+            // const title = typeof req.body.title === "string" ? JSON.parse(req.body.title) : req.body.title || [];
+
+            const { morningMeal, afternoonMeal, eveningMeal } = req.body;
             const repo = AppDataSource.getRepository(Gallery);
             const existingGalleryDetails = await repo.findOne({ where: { id } });
 
@@ -158,6 +209,92 @@ export class GalleryController {
             });
         }
     }
+
+
+
+    // static async updateImageData(req: Request, res: Response) {
+    //     try {
+    //         const { id } = req.params
+    //         const filePath = await CommonController.uploadDocument(req, res)
+    //         let fpath, docId
+    //         if (filePath && filePath.status === true) {
+    //             fpath = filePath.fpath
+    //             docId = filePath.docId
+    //         }
+    //         const galleryDetails = await Gallery.findOne({ where: { id } })
+    //         let index = galleryDetails.morningMeal?.findIndex(item => item.imgId === req.body.imgId)
+    //         if (index !== -1 && index !== undefined) {
+    //             galleryDetails.morningMeal[index] = {
+    //                 ...galleryDetails.morningMeal[index],
+    //                 title: req.body.title,
+    //                 uploadedAt: new Date(),
+    //                 uploadedBy:userData.userName
+    //             };
+    //             if (filePath && filePath.status === true) {
+    //                 galleryDetails.morningMeal[index] = {
+    //                     ...galleryDetails.morningMeal[index],
+    //                     imagePath: fpath,
+    //                     imgId: docId
+    //                 }
+    //             }
+    //         }
+    //         if (index == -1) {
+    //             index = galleryDetails.afternoonMeal?.findIndex(item => item.imgId === req.body.imgId)
+    //         }
+    //         if (index !== -1 && index !== undefined) {
+    //             galleryDetails.afternoonMeal[index] = {
+    //                 ...galleryDetails.afternoonMeal[index],
+    //                 title: req.body.title,
+    //                 uploadedAt: new Date(),
+    //                 uploadedBy:userData.userName
+    //             };
+    //             if (filePath && filePath.status === true) {
+    //                 galleryDetails.afternoonMeal[index] = {
+    //                     ...galleryDetails.afternoonMeal[index],
+    //                     imagePath: fpath,
+    //                     imgId: docId
+    //                 }
+    //             }
+    //         }
+    //         if (index == -1) {
+    //             index = galleryDetails.eveningMeal?.findIndex(item => item.imgId === req.body.imgId)
+    //         }
+    //         if (index !== -1 && index !== undefined) {
+    //             galleryDetails.eveningMeal[index] = {
+    //                 ...galleryDetails.eveningMeal[index],
+    //                 title: req.body.title,
+    //                 uploadedAt: new Date(),
+    //                 uploadedBy:userData.userName
+    //             };
+    //             if (filePath && filePath.status === true) {
+    //                 galleryDetails.eveningMeal[index] = {
+    //                     ...galleryDetails.eveningMeal[index],
+    //                     imagePath: fpath,
+    //                     imgId: docId
+    //                 }
+    //             }
+    //         }
+
+    //         if (index == -1) {
+    //             return res.status(404).json({
+    //                 success: false,
+    //                 message: "Not Found",
+    //             });
+
+    //         }
+    //         await galleryDetails.save()
+    //         return res.status(201).json({
+    //             success: true, message: "Data Updated Successfully"
+    //         })
+    //     } catch (error) {
+    //         return res.status(500).json({
+    //             success: false,
+    //             message: error instanceof Error ? error.message : "An unknown error occurred",
+    //         });
+    //     }
+    // }
+
+
     static async updateGalleryImage(req: Request, res: Response) {
         try {
             const { id } = req.params;

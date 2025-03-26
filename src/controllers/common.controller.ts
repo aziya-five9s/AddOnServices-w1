@@ -102,33 +102,4 @@ export class CommonController {
             };
         }
     }
-
-    // static async uploadDocument(req) {
-    //     try {
-
-
-    //         if (!req.file) {
-    //             return { status: false, message: "No file uploaded" }
-    //         }
-    //         // const absoluteFilePath = req.file.path
-    //         const publicBaseDir = path.resolve(__dirname, "../../src/public/uploads")
-
-    //         const ext = path.extname(req.file.originalname)
-    //         const newFileName = `${req.docId}${ext}`
-    //         const newFilePath = path.join(publicBaseDir, newFileName)
-
-    //         const relativeFilePath = path.relative(publicBaseDir, newFilePath)
-    //         const normalizedRelativePath = `/${relativeFilePath.replace(/\\/g, "/")}`
-    //         const fpath = normalizedRelativePath.replace("/../../../../", "")
-    //         //to be changed later
-    //         return { status: true, fpath }
-    //     } catch (error) {
-    //         return {
-    //             status: false,
-    //             message: error.message
-    //                 ? error.message
-    //                 : "Something went wrong while uploading document",
-    //         }
-    //     }
-    // }
 }

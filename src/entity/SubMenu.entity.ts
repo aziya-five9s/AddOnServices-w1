@@ -11,7 +11,6 @@ import {
     JoinColumn,
 } from "typeorm"
 import { TenantInfo } from "./TenantInfo.entity"
-// import { EmissionStandardEnum } from "../../../enum/emissionStandard.enum"
 
 @Entity({ name: "SubMenu" })//table got created
 export class SubMenu extends BaseEntity {

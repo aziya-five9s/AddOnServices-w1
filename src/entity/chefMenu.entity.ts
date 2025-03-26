@@ -7,7 +7,6 @@ import {
     BaseEntity,
     DeleteDateColumn,
 } from "typeorm"
-// import { EmissionStandardEnum } from "../../../enum/emissionStandard.enum"
 
 @Entity({ name: "ChefMenu" })//table got created
 export class ChefMenu extends BaseEntity {

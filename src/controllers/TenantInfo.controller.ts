@@ -1,10 +1,6 @@
 import { Request, Response } from "express"
-// import moment from "moment"
-// import { z, ZodError } from "zod"
-// // import { v4 as uuidv4 } from "uuid"
 import { AppDataSource } from "../data-source"
 import { TenantInfo } from "../entity/TenantInfo.entity"
-import { AnyObject } from "../types/common"
 import { CommonController } from "./common.controller"
 import { Raw } from "typeorm"
 
@@ -13,69 +9,39 @@ export class TenantInfoController {
 
 
     //---------------------------------------Footer,Header Sections start--------------------------------------
+
   
-  //not working check
-    // static async postTenantInfoData(req: Request, res: Response) {
-    //     try {
-    //         const { address, contactUs, policies, followUsOn, changeoutlet } = req.body
-    //         const tenantName=req.body.tenantName
-
-    //         // const isExistingTenant = await TenantInfo.findOne({
-    //         //     where: { tenantName: Raw((alias) => `LOWER(${alias}) = LOWER(:tenantName)`, { tenantName }) },
-    //         // });
-    //         // if (isExistingTenant) {
-    //         //     return res.status(409).json({
-    //         //         success: false,
-    //         //         message: 'This Tenant Name Already Exists',
-    //         //     });
-    //         // }
-
-            
-    //         const filePath = await CommonController.uploadDocument(req, res)
-    //         if (!filePath || filePath.status === false) {
-    //             return res.status(400).json({ success: false, message: "No file uploaded!" })
-    //         }
-    //         const TenantInfoData = new TenantInfo()
-            
-    //         TenantInfoData.address = address
-    //         TenantInfoData.tenantId = userData.tenantId
-    //         TenantInfoData.tenantName = tenantName
-    //         TenantInfoData.contactUs = contactUs
-    //         TenantInfoData.policies = JSON.parse(policies)
-    //         TenantInfoData.followUsOn = JSON.parse(followUsOn)
-    //         TenantInfoData.logo = { docId: filePath.docId, docPath: filePath.fpath, uploadedAt: new Date(), uploadedBy: userData.userName }
-    //         TenantInfoData.changeoutlet = JSON.parse(changeoutlet)
-    //         await TenantInfoData.save()
-    //         req.logo = filePath.fpath
-    //         return res.status(200).json({
-    //             success: true, message: "Data Saved Successfully"
-    //         })
-    //     }
-    //     catch (error) {
-    //         return res.status(500).json({
-    //             success: false,
-    //             message: (error as Error).message
-    //         })
-    //     }
-    // }
-
-
     static async postTenantInfoData(req: Request, res: Response) {
         try {
+            // const { address, contactUs, policies, followUsOn, changeoutlet, tenantName } = req.body
             const filePath = await CommonController.uploadDocument(req, res)
             if (!filePath || filePath.status === false) {
                 return res.status(400).json({ success: false, message: "No file uploaded!" })
             }
-            const { address, contactUs, policies, followUsOn, changeoutlet, tenantName } = req.body
+            const { address, contactUs, policies, followUsOn, changeoutlet, tenantName,tenantId } = req.body
+
+            const tenantInfo = await TenantInfo.findOne({
+                // select: ["tenantId", "tenantName"], // Selecting required fields
+                where: [
+                    { tenantId: Raw((alias) => `${alias} = :tenantId`, { tenantId }) }, // Match tenantId exactly
+                    { tenantName: Raw((alias) => `LOWER(${alias}) = LOWER(:tenantName)`, { tenantName }) } // Case-insensitive match for tenantName
+                ]
+            });
+            
+            if (tenantInfo) {
+                return res.status(409).json({
+                    success: false, message: "Tenant already exist"
+                })
+            }
+
             const TenantInfoData = new TenantInfo()
             TenantInfoData.address = address
-            TenantInfoData.tenantId = userData.tenantId
+            TenantInfoData.tenantId = tenantId
             TenantInfoData.tenantName = tenantName
             TenantInfoData.contactUs = contactUs
             TenantInfoData.policies = JSON.parse(policies)
             TenantInfoData.followUsOn = JSON.parse(followUsOn)
             TenantInfoData.logo = { docId: filePath.docId, docPath: filePath.fpath, uploadedAt: new Date(), uploadedBy: userData.userName }
-            TenantInfoData.changeoutlet = JSON.parse(changeoutlet)
             await TenantInfoData.save()
             req.logo = filePath.fpath
             return res.status(200).json({
@@ -122,82 +88,13 @@ export class TenantInfoController {
         }
     }
 
-    // static async updateTenantInfoData(req: Request, res: Response) {
-    //     try {
-    //         const { address, contactUs, policies, followUsOn, changeoutlet, tenantName } = req.body
-    //         const filePath = await CommonController.uploadDocument(req, res)
-    //         const repo = AppDataSource.getRepository(TenantInfo);
-    //         const { id } = req.params; // Extract the TenantInfo ID from request parameters
-    //         if (!id) {
-    //             return res.status(404).json({
-    //                 success: false,
-    //                 message: "Id not found",
-    //             });
-    //         }
-    //         // Check if the TenantInfo record exists
-    //         const existingTenantInfo = await repo.findOne({ where: { id } });
-    //         if (!existingTenantInfo) {
-    //             return res.status(404).json({
-    //                 success: false,
-    //                 message: "TenantInfo data not found",
-    //             });
-    //         }
-    //         if (filePath && filePath.status == true) {
-    //             existingTenantInfo.logo = { docId: filePath.docId, docPath: filePath.fpath, uploadedAt: new Date(), uploadedBy: userData.userName }
-    //             req.logo = filePath.fpath
-    //         }
-
-    //         // existingTenantInfo.address = req.body.address
-    //         // existingTenantInfo.contactUs = req.body.contactUs
-    //         // existingTenantInfo.tenantName = req.body.tenantName
-    //         // existingTenantInfo.policies = JSON.parse( req.body.policies)
-    //         // existingTenantInfo.followUsOn = JSON.parse( req.body.followUsOn)
-    //         // existingTenantInfo.changeoutlet = JSON.parse( req.body.changeoutlet)
-
-
-
-    //         // 18/03/2025
-
-    //         // List of updatable fields
-    //     const fieldsToUpdate = {
-    //         address: req.body.address,
-    //         contactUs: req.body.contactUs,
-    //         tenantName: req.body.tenantName,
-    //         policies: req.body.policies ? JSON.parse(req.body.policies) : undefined,
-    //         followUsOn: req.body.followUsOn ? JSON.parse(req.body.followUsOn) : undefined,
-    //         changeoutlet: req.body.changeoutlet ? JSON.parse(req.body.changeoutlet) : undefined,
-    //     };
-
-    //     // Update only provided fields
-    //     Object.keys(fieldsToUpdate).forEach((key) => {
-    //         if (fieldsToUpdate[key] !== undefined) {
-    //             existingTenantInfo[key] = fieldsToUpdate[key];
-    //         }
-    //     });
-
-
-    //         await existingTenantInfo.save()
-    //         return res.status(200).json({
-    //             success: true,
-    //             message: "TenantInfo data updated successfully",
-    //             // data: existingTenantInfo,
-    //         });
-    //     }
-    //     catch (error) {
-    //         return res.status(500).json({
-    //             success: false,
-    //             message: error instanceof Error ? error.message : "An unknown error occurred",
-    //         });
-    //     }
-    // }
-
-
+   
     static async updateTenantInfoData(req: Request, res: Response) {
         try {
-            const { address, contactUs, policies, followUsOn, changeoutlet, tenantName } = req.body
             const filePath = await CommonController.uploadDocument(req, res)
             const repo = AppDataSource.getRepository(TenantInfo);
             const { id } = req.params; // Extract the TenantInfo ID from request parameters
+            const { address, contactUs, policies, followUsOn, changeoutlet, tenantName } = req.body
             if (!id) {
                 return res.status(404).json({
                     success: false,
@@ -216,12 +113,6 @@ export class TenantInfoController {
                 existingTenantInfo.logo = { docId: filePath.docId, docPath: filePath.fpath, uploadedAt: new Date(), uploadedBy: userData.userName }
                 req.logo = filePath.fpath
             }
-            // existingTenantInfo.address = req.body.address
-            // existingTenantInfo.contactUs = req.body.contactUs
-            // existingTenantInfo.tenantName = req.body.tenantName
-            // existingTenantInfo.policies = JSON.parse( req.body.policies)
-            // existingTenantInfo.followUsOn = JSON.parse( req.body.followUsOn)
-            // existingTenantInfo.changeoutlet = JSON.parse( req.body.changeoutlet)
 
             if (req.body.address !== undefined) existingTenantInfo.address = req.body.address;
             if (req.body.contactUs !== undefined) existingTenantInfo.contactUs = req.body.contactUs;
@@ -249,18 +140,19 @@ export class TenantInfoController {
     //---------------------------------------Hero Section start--------------------------------------
     static async addHeroSectionData(req: Request, res: Response) {
         try {
-            // const { title, subTitle, userId } = req.body
-
-         
-            const tenantId=req.params.tenantId
+            const tenantId = req.params.tenantId
             const filePath = await CommonController.uploadDocument(req, res)
             if (!filePath || filePath.status === false) {
                 return res.status(400).json({ success: false, message: "No file uploaded!" })
             }
 
-            // const ChefDetails = await TenantInfo.findOne({ where: { tenantId: req.body.tenantId } })
-          
             const ChefDetails = await TenantInfo.findOne({ where: { tenantId: tenantId } })
+
+            if(ChefDetails==undefined){
+                return res.status(409).json({
+                    success: false, message: "Tenant Not Found"
+                })
+            }
             ChefDetails.heroSection = [
                 ...(ChefDetails.heroSection || []),
                 {
@@ -283,8 +175,6 @@ export class TenantInfoController {
             });
         }
     }
-
-    //doubt
 
     static async updateHeroSectionData(req: Request, res: Response) {
         try {
@@ -332,7 +222,6 @@ export class TenantInfoController {
         }
     }
 
-    //doubt
     static async deleteHeroSectionData(req: Request, res: Response) {
         try {
             const { imgid, id } = req.params
@@ -355,11 +244,13 @@ export class TenantInfoController {
 
     static async getHeroSectionData(req: Request, res: Response) {
         try {
-            const { tenantId, id } = req.params
+            // const { tenantId, id} = req.params
+            const { tenantId, id ,imgId} = req.params
             const ChefDetails = await TenantInfo.findOne({ where: { tenantId: tenantId } })
 
             if (id) {
                 const heroSection = ChefDetails?.heroSection.find((el) => el.imgId === id)
+                // const heroSection = ChefDetails?.heroSection.find((el) => el.imgId === imgId)
                 return res.status(200).json({
                     success: true, data: heroSection ? heroSection : {}
                 })
@@ -392,9 +283,16 @@ export class TenantInfoController {
             }
 
             const AboutSectionDetails = await TenantInfo.findOne({ where: { id, tenantId: req.body.tenantId } })
+           
+            if(AboutSectionDetails==undefined){
+                return res.status(409).json({
+                    success: false, message: "Tenant Not Found"
+                })
+            }
+         
             AboutSectionDetails.aboutSection =
-            // ...(AboutSectionDetails.aboutSection || []),
             {
+                title:req.body.title,
                 description: req.body.description,
                 imagePath: filePath.fpath,
                 imgId: filePath.docId,
@@ -433,15 +331,15 @@ export class TenantInfoController {
 
     static async getAboutSectionData(req: Request, res: Response) {
         try {
-            const  id  = req.params.id;
-    
+            const id = req.params.id;
+
             // Find the tenant information by tenantId
             const tenantInfo = await TenantInfo.findOne({ where: { id } });
-    
+
             if (!tenantInfo) {
                 return res.status(404).json({ success: false, message: "Tenant not found!" });
             }
-    
+
             // Extract the aboutSection field
             return res.status(200).json({
                 success: true,
@@ -455,7 +353,7 @@ export class TenantInfoController {
             });
         }
     }
-    
+
 
 
 
