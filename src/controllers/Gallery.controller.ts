@@ -17,7 +17,7 @@ export class GalleryController {
                 return res.status(400).json({ success: false, message: "No file uploaded!" });
             }
 
-            const { tenantId, meals } = req.body;
+            const { tenantId, meals,title, } = req.body;
             const tenantinfo = await TenantInfo.findOne({ where: { tenantId } })
 
             if (!tenantinfo) {
@@ -30,14 +30,14 @@ export class GalleryController {
 
             // Format uploaded images
             const uploadedImages = filePath.files.map((file, index) => ({
-                title: req.body.title[index],
+                title: title[index],
                 imagePath: file.fpath,
                 imgId: file.docId,
                 uploadedAt: new Date(),
                 uploadedBy: userData.userName
             }));
 
-            repo.tenantId = req.body.tenantId
+            repo.tenantId = tenantId
             repo.morningMeal = uploadedImages
             await repo.save();
             return res.status(200).json({ success: true, message: "Gallery added successfully" });
@@ -80,14 +80,104 @@ export class GalleryController {
         }
     }
 
+
+    // static async updateGalleryData1(req: Request, res: Response) {
+    //     try {
+    //         const { id } = req.params;
+
+    //         const repo = AppDataSource.getRepository(Gallery);
+    //         const existingGalleryDetails = await repo.findOne({ where: { id } });
+            
+    //         const { titles,morningMeal, afternoonMeal, eveningMeal } = req.body;
+
+    //         const title = req.body?.title ? JSON.parse(req.body.title) : []
+    //         if (!existingGalleryDetails) {
+    //             return res.status(404).json({
+    //                 success: false,
+    //                 message: "Gallery data not found",
+    //             });
+    //         }
+    //         // Upload new images
+    //         const fileUploadResult = await CommonController.uploadDocuments(req, res);
+    //         let uploadedImages
+    //         if (fileUploadResult.status) {
+    //             uploadedImages = fileUploadResult.files.map((file, index) => ({
+    //                 // title: req.body.title[index],
+    //                 title: req.body.title,
+    //                 imagePath: file.fpath,
+    //                 imgId: file.docId,
+    //                 uploadedAt: new Date(),
+    //                 uploadedBy: userData.userName
+    //             }));
+    //         }
+    //         else {
+    //             return res.status(400).json({
+    //                 success: false,
+    //                 message: fileUploadResult.message,
+    //             });
+    //         }
+
+    //         if (req.body.morningMeal == true || req.body.morningMeal == "true") {
+    //             // Ensure the images field exists
+    //             if (!existingGalleryDetails.morningMeal) {
+    //                 existingGalleryDetails.morningMeal = [];
+    //             }
+    //             //   Append new images to existing ones
+    //             existingGalleryDetails.morningMeal = [...existingGalleryDetails.morningMeal, ...uploadedImages];
+
+    //         }
+
+    //         if (req.body.afternoonMeal == true || req.body.afternoonMeal == "true") {
+    //             // Ensure the images field exists
+    //             if (!existingGalleryDetails.afternoonMeal) {
+    //                 existingGalleryDetails.afternoonMeal = [];
+    //             }
+    //             //   Append new images to existing ones
+    //             existingGalleryDetails.afternoonMeal = [...existingGalleryDetails.afternoonMeal, ...uploadedImages];
+
+    //         }
+    //         if (req.body.eveningMeal == true || req.body.eveningMeal == "true") {
+    //             // Ensure the images field exists
+    //             if (!existingGalleryDetails.eveningMeal) {
+    //                 existingGalleryDetails.eveningMeal = [];
+    //             }
+    //             //   Append new images to existing ones
+    //             existingGalleryDetails.eveningMeal = [...existingGalleryDetails.eveningMeal, ...uploadedImages];
+
+    //         }
+
+    //         // Save the updated record
+    //         await existingGalleryDetails.save();
+
+    //         return res.status(200).json({
+    //             success: true,
+    //             message: "Gallery data updated successfully"
+    //         });
+    //     } catch (error) {
+    //         return res.status(500).json({
+    //             success: false,
+    //             message: error instanceof Error ? error.message : "An unknown error occurred",
+    //         });
+    //     }
+    // }
+    
     static async updateGalleryData(req: Request, res: Response) {
         try {
             const { id } = req.params;
 
-            const title = req.body?.title ? JSON.parse(req.body.title) : []
-           const { morningMeal, afternoonMeal, eveningMeal } = req.body;
             const repo = AppDataSource.getRepository(Gallery);
             const existingGalleryDetails = await repo.findOne({ where: { id } });
+            
+            // const { titles,morningMeal, afternoonMeal, eveningMeal } = req.body;
+
+            // const title = req.body?.title ? JSON.parse(req.body.title) : []
+
+            //code changed
+            const { morningMeal, afternoonMeal, eveningMeal, title: titleString } = req.body;
+            const title = titleString ? JSON.parse(titleString) : [];
+            
+
+
 
             if (!existingGalleryDetails) {
                 return res.status(404).json({
@@ -101,7 +191,7 @@ export class GalleryController {
             if (fileUploadResult.status) {
                 uploadedImages = fileUploadResult.files.map((file, index) => ({
                     // title: req.body.title[index],
-                    title: req.body.title,
+                    title: title,
                     imagePath: file.fpath,
                     imgId: file.docId,
                     uploadedAt: new Date(),
@@ -115,7 +205,7 @@ export class GalleryController {
                 });
             }
 
-            if (req.body.morningMeal == true || req.body.morningMeal == "true") {
+            if (morningMeal == true || morningMeal == "true") {
                 // Ensure the images field exists
                 if (!existingGalleryDetails.morningMeal) {
                     existingGalleryDetails.morningMeal = [];
@@ -125,7 +215,7 @@ export class GalleryController {
 
             }
 
-            if (req.body.afternoonMeal == true || req.body.afternoonMeal == "true") {
+            if (afternoonMeal == true || afternoonMeal == "true") {
                 // Ensure the images field exists
                 if (!existingGalleryDetails.afternoonMeal) {
                     existingGalleryDetails.afternoonMeal = [];
@@ -134,7 +224,7 @@ export class GalleryController {
                 existingGalleryDetails.afternoonMeal = [...existingGalleryDetails.afternoonMeal, ...uploadedImages];
 
             }
-            if (req.body.eveningMeal == true || req.body.eveningMeal == "true") {
+            if (eveningMeal == true || eveningMeal == "true") {
                 // Ensure the images field exists
                 if (!existingGalleryDetails.eveningMeal) {
                     existingGalleryDetails.eveningMeal = [];
@@ -161,16 +251,16 @@ export class GalleryController {
     static async updateGalleryImage(req: Request, res: Response) {
         try {
             const { id } = req.params;
-            // const { imgId, title } = req.body;
-            const title = req.body.title;
-            const imgId = req.body.imgId;
-
+            
             // Upload new file if provided
             const filePath = await CommonController.uploadDocument(req, res);
             const updatedImage = filePath?.status
-                ? { imagePath: filePath.fpath, imgId: filePath.docId }
-                : {};
-
+            ? { imagePath: filePath.fpath, imgId: filePath.docId }
+            : {};
+            
+            const { imgId, title } = req.body;
+            // const title = req.body.title;
+            // const imgId = req.body.imgId;
             // Find the gallery entry
             const galleryDetails = await Gallery.findOne({ where: { id } });
             if (!galleryDetails) {
@@ -183,11 +273,11 @@ export class GalleryController {
 
             for (const mealType of mealTypes) {
                 if (galleryDetails[mealType]) {
-                    const index = galleryDetails[mealType].findIndex(item => item.imgId === req.body.imgId);
+                    const index = galleryDetails[mealType].findIndex(item => item.imgId === imgId);
                     if (index !== -1) {
                         galleryDetails[mealType][index] = {
                             ...galleryDetails[mealType][index],
-                            title: req.body.title,
+                            title: title,
                             uploadedAt: new Date(),
                             uploadedBy: userData.userName,
                             ...updatedImage, // Merge updated image if provided

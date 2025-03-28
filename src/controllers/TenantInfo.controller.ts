@@ -10,15 +10,14 @@ export class TenantInfoController {
 
     //---------------------------------------Footer,Header Sections start--------------------------------------
 
-  
+
     static async postTenantInfoData(req: Request, res: Response) {
         try {
-            // const { address, contactUs, policies, followUsOn, changeoutlet, tenantName } = req.body
             const filePath = await CommonController.uploadDocument(req, res)
             if (!filePath || filePath.status === false) {
                 return res.status(400).json({ success: false, message: "No file uploaded!" })
             }
-            const { address, contactUs, policies, followUsOn, changeoutlet, tenantName,tenantId } = req.body
+            const { address, contactUs, policies, followUsOn, tenantName, tenantId } = req.body
 
             const tenantInfo = await TenantInfo.findOne({
                 // select: ["tenantId", "tenantName"], // Selecting required fields
@@ -27,13 +26,11 @@ export class TenantInfoController {
                     { tenantName: Raw((alias) => `LOWER(${alias}) = LOWER(:tenantName)`, { tenantName }) } // Case-insensitive match for tenantName
                 ]
             });
-            
             if (tenantInfo) {
                 return res.status(409).json({
                     success: false, message: "Tenant already exist"
                 })
             }
-
             const TenantInfoData = new TenantInfo()
             TenantInfoData.address = address
             TenantInfoData.tenantId = tenantId
@@ -88,7 +85,7 @@ export class TenantInfoController {
         }
     }
 
-   
+
     static async updateTenantInfoData(req: Request, res: Response) {
         try {
             const filePath = await CommonController.uploadDocument(req, res)
@@ -113,13 +110,16 @@ export class TenantInfoController {
                 existingTenantInfo.logo = { docId: filePath.docId, docPath: filePath.fpath, uploadedAt: new Date(), uploadedBy: userData.userName }
                 req.logo = filePath.fpath
             }
+            // if (address !== undefined && address !== null && address !=="") {
+            //     existingTenantInfo.address = address;
+            // }
 
-            if (req.body.address !== undefined) existingTenantInfo.address = req.body.address;
-            if (req.body.contactUs !== undefined) existingTenantInfo.contactUs = req.body.contactUs;
-            if (req.body.tenantName !== undefined) existingTenantInfo.tenantName = req.body.tenantName;
-            if (req.body.policies !== undefined) existingTenantInfo.policies = JSON.parse(req.body.policies);
-            if (req.body.followUsOn !== undefined) existingTenantInfo.followUsOn = JSON.parse(req.body.followUsOn);
-            if (req.body.changeoutlet !== undefined) existingTenantInfo.changeoutlet = JSON.parse(req.body.changeoutlet);
+            if (address !== undefined) existingTenantInfo.address = address;
+            if (contactUs !== undefined) existingTenantInfo.contactUs = contactUs;
+            if (tenantName !== undefined) existingTenantInfo.tenantName = tenantName;
+            if (policies !== undefined) existingTenantInfo.policies = JSON.parse(policies);
+            if (followUsOn !== undefined) existingTenantInfo.followUsOn = JSON.parse(followUsOn);
+            if (changeoutlet !== undefined) existingTenantInfo.changeoutlet = JSON.parse(changeoutlet);
 
             await existingTenantInfo.save()
             return res.status(200).json({
@@ -145,10 +145,10 @@ export class TenantInfoController {
             if (!filePath || filePath.status === false) {
                 return res.status(400).json({ success: false, message: "No file uploaded!" })
             }
-
+            const { title, subTitle } = req.body
             const ChefDetails = await TenantInfo.findOne({ where: { tenantId: tenantId } })
 
-            if(ChefDetails==undefined){
+            if (ChefDetails == undefined) {
                 return res.status(409).json({
                     success: false, message: "Tenant Not Found"
                 })
@@ -156,8 +156,8 @@ export class TenantInfoController {
             ChefDetails.heroSection = [
                 ...(ChefDetails.heroSection || []),
                 {
-                    title: req.body.title,
-                    subTitle: req.body.subTitle,
+                    title: title,
+                    subTitle: subTitle,
                     imagePath: filePath.fpath,
                     imgId: filePath.docId,
                     updatedAt: new Date(),
@@ -176,24 +176,28 @@ export class TenantInfoController {
         }
     }
 
+    //doubt self code
     static async updateHeroSectionData(req: Request, res: Response) {
         try {
             const { id } = req.params
-            const { title, subTitle, imgId, tenantId } = req.body
             const filePath = await CommonController.uploadDocument(req, res)
             let fpath, docId
             if (filePath && filePath.status === true) {
                 fpath = filePath.fpath
                 docId = filePath.docId
             }
+            const { title, subTitle, imgId } = req.body
             const ChefDetails = await TenantInfo.findOne({ where: { id } })
-            const index = ChefDetails.heroSection?.findIndex(item => item.imgId === req.body.imgId);
-            // If found, update the existing entry
+            const index = ChefDetails.heroSection?.findIndex(item => item.imgId === imgId);
             if (index !== -1 && index !== undefined) {
                 ChefDetails.heroSection[index] = {
                     ...ChefDetails.heroSection[index],
-                    title: req.body.title,
-                    subTitle: req.body.subTitle,
+
+                    title: title !== undefined && title !== "" ? title : ChefDetails.heroSection[index].title,
+                    subTitle: subTitle !== undefined && subTitle !== "" ? subTitle : ChefDetails.heroSection[index].subTitle,
+                  
+                    // title: title,
+                    // subTitle: subTitle,
                     updatedAt: new Date(),
                 };
                 if (filePath && filePath.status === true) {
@@ -245,7 +249,7 @@ export class TenantInfoController {
     static async getHeroSectionData(req: Request, res: Response) {
         try {
             // const { tenantId, id} = req.params
-            const { tenantId, id ,imgId} = req.params
+            const { tenantId, id, imgId } = req.params
             const ChefDetails = await TenantInfo.findOne({ where: { tenantId: tenantId } })
 
             if (id) {
@@ -282,18 +286,20 @@ export class TenantInfoController {
                 return res.status(400).json({ success: false, message: "No file uploaded!" })
             }
 
-            const AboutSectionDetails = await TenantInfo.findOne({ where: { id, tenantId: req.body.tenantId } })
-           
-            if(AboutSectionDetails==undefined){
+            const { tenantId, title, description } = req.body
+            const AboutSectionDetails = await TenantInfo.findOne({ where: { id, tenantId: tenantId } })
+
+
+            if (AboutSectionDetails == undefined) {
                 return res.status(409).json({
                     success: false, message: "Tenant Not Found"
                 })
             }
-         
+
             AboutSectionDetails.aboutSection =
             {
-                title:req.body.title,
-                description: req.body.description,
+                title: title,
+                description: description,
                 imagePath: filePath.fpath,
                 imgId: filePath.docId,
                 uploadedBy: userData.userName,

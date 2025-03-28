@@ -6,9 +6,14 @@ const Router = express.Router()
 
 
 Router.post("/create",SubMenuController.postSubMenuData)
-Router.delete("/delete/:id",SubMenuController.deleteSubMenuData)
+
+
+// Router.delete("/delete/:id",SubMenuController.deleteSubMenuData)
 Router.route("/get/:id?").get(SubMenuController.getSubMenuData)
 Router.route("/update/:id").put(SubMenuController.updateSubMenuData);
+
+//doubt new
+Router.delete("/delete/:id/:imgId", SubMenuController.deleteSubMenuData);
 
 export { Router as subMenuRouter }
 
