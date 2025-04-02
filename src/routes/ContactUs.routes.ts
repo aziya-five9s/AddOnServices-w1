@@ -10,5 +10,6 @@ Router.post("/create",ContactUsController.postContactUsData)
 Router.delete("/delete/:id",ContactUsController.deleteContactUsData)
 Router.route("/get/:id?").get(ContactUsController.getContactUsData)
 Router.route("/update/:id").put(ContactUsController.updateContactUsData);
+Router.route("/updateimage/:id").put(ContactUsController.updateContactImage);
 
 export { Router as contactUsRouter }

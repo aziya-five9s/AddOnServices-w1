@@ -94,11 +94,79 @@ export class ContactUsController {
         }
     }
 
+    // static async updateContactUsData(req: Request, res: Response) {
+    //     try {
+    //         const { id } = req.params; // Extract ContactUs ID from request parameters
+    //         const { description, address, email, contact, tenantId } = req.body;
+    
+    //         const repo = AppDataSource.getRepository(ContactUs);
+    //         const existingContactUsDetails = await repo.findOne({ where: { id } });
+    
+    //         if (!existingContactUsDetails) {
+    //             return res.status(404).json({
+    //                 success: false,
+    //                 message: "ContactUs data not found",
+    //             });
+    //         }
+    //         // Ensure the images field exists
+    //         if (!existingContactUsDetails.images) {
+    //             existingContactUsDetails.images = [];
+    //         }
+
+    //         // Upload new images
+    //         const fileUploadResult = await CommonController.uploadDocuments(req, res);
+    //         if (fileUploadResult.status) {
+    //             const uploadedImages = fileUploadResult.files.map(file => ({
+    //                 imagePath: file.fpath,
+    //                 imgId: file.docId,
+    //                 updatedAt: new Date(),
+    //                 uploadedBy: userData.userName,
+    //             }));
+    
+    //             // Check if total images exceed the limit (max 4)
+    //             if (existingContactUsDetails.images.length + uploadedImages.length > 4) {
+    //                 return res.status(400).json({
+    //                     success: false,
+    //                     message: "Number of uploaded images exceeds the maximum limit (4)",
+    //                 });
+    //             }
+    
+    //             // Append new images to existing ones
+    //             existingContactUsDetails.images = [...existingContactUsDetails.images, ...uploadedImages];
+    //         }
+    //         else{
+    //             return res.status(400).json({
+    //                 success: false,
+    //                 message: fileUploadResult.message,
+    //             });
+    //         }
+    
+    //         // Update other fields if provided
+    //         if (description !== undefined) existingContactUsDetails.description = description;
+    //         if (address !== undefined) existingContactUsDetails.address = address;
+    //         if (email !== undefined) existingContactUsDetails.email = email;
+    //         if (contact !== undefined) existingContactUsDetails.contact = JSON.parse(contact);
+    
+    //         // Save the updated record
+    //         await existingContactUsDetails.save();
+    
+    //         return res.status(200).json({
+    //             success: true,
+    //             message: "ContactUs data updated successfully",
+    //             data: existingContactUsDetails,
+    //         });
+    //     } catch (error) {
+    //         return res.status(500).json({
+    //             success: false,
+    //             message: error instanceof Error ? error.message : "An unknown error occurred",
+    //         });
+    //     }
+    // }
+    
+
     static async updateContactUsData(req: Request, res: Response) {
         try {
-            const { id } = req.params; // Extract ContactUs ID from request parameters
-            const { description, address, email, contact, tenantId } = req.body;
-    
+            const { id } = req.params;
             const repo = AppDataSource.getRepository(ContactUs);
             const existingContactUsDetails = await repo.findOne({ where: { id } });
     
@@ -108,22 +176,22 @@ export class ContactUsController {
                     message: "ContactUs data not found",
                 });
             }
-            // Ensure the images field exists
             if (!existingContactUsDetails.images) {
                 existingContactUsDetails.images = [];
             }
-
-            // Upload new images
+    
+            let uploadedImages = [];
             const fileUploadResult = await CommonController.uploadDocuments(req, res);
-            if (fileUploadResult.status) {
-                const uploadedImages = fileUploadResult.files.map(file => ({
+            const { description, address, email, contact } = req.body;
+    
+            if (fileUploadResult.status && Array.isArray(fileUploadResult.files) && fileUploadResult.files.length > 0) {
+                uploadedImages = fileUploadResult.files.map(file => ({
                     imagePath: file.fpath,
                     imgId: file.docId,
                     updatedAt: new Date(),
                     uploadedBy: userData.userName,
                 }));
     
-                // Check if total images exceed the limit (max 4)
                 if (existingContactUsDetails.images.length + uploadedImages.length > 4) {
                     return res.status(400).json({
                         success: false,
@@ -131,23 +199,19 @@ export class ContactUsController {
                     });
                 }
     
-                // Append new images to existing ones
                 existingContactUsDetails.images = [...existingContactUsDetails.images, ...uploadedImages];
-            }
-            else{
+            } else if (!fileUploadResult.status && fileUploadResult.files && fileUploadResult.files.length > 0) {
                 return res.status(400).json({
                     success: false,
                     message: fileUploadResult.message,
                 });
             }
     
-            // Update other fields if provided
-            if (description !== undefined) existingContactUsDetails.description = description;
-            if (address !== undefined) existingContactUsDetails.address = address;
-            if (email !== undefined) existingContactUsDetails.email = email;
-            if (contact !== undefined) existingContactUsDetails.contact = JSON.parse(contact);
+            existingContactUsDetails.description = description !== undefined ? description : existingContactUsDetails.description;
+            existingContactUsDetails.address = address !== undefined ? address : existingContactUsDetails.address;
+            existingContactUsDetails.email = email !== undefined ? email : existingContactUsDetails.email;
+            existingContactUsDetails.contact = contact !== undefined ? JSON.parse(contact) : existingContactUsDetails.contact;
     
-            // Save the updated record
             await existingContactUsDetails.save();
     
             return res.status(200).json({
@@ -162,6 +226,72 @@ export class ContactUsController {
             });
         }
     }
+    static async updateContactImage(req: Request, res: Response) {
+        try {
+            const { id } = req.params;
+            const repo = AppDataSource.getRepository(ContactUs);
+            const existingContactUsDetails = await repo.findOne({ where: { id } });
+    
+            if (!existingContactUsDetails) {
+                return res.status(404).json({
+                    success: false,
+                    message: "ContactUs data not found",
+                });
+            }
+    
+            if (!existingContactUsDetails.images) {
+                existingContactUsDetails.images = [];
+            }
+    
+            let isUpdated = false;
+            const fileUploadResult = await CommonController.uploadDocuments(req, res);
+            const { imgId } = req.body;
+    
+            if (fileUploadResult.status && Array.isArray(fileUploadResult.files) && fileUploadResult.files.length > 0) {
+                const updatedImage = {
+                    imagePath: fileUploadResult.files[0].fpath,
+                    imgId: fileUploadResult.files[0].docId,
+                    updatedAt: new Date(),
+                    uploadedBy: userData.userName,
+                };
+    
+                const index = existingContactUsDetails.images.findIndex(img => img.imgId === imgId);
+                if (index !== -1) {
+                    existingContactUsDetails.images[index] = { ...existingContactUsDetails.images[index], ...updatedImage };
+                    isUpdated = true;
+                } else {
+                    return res.status(404).json({
+                        success: false,
+                        message: "Image not found in ContactUs data",
+                    });
+                }
+            } else if (!fileUploadResult.status && fileUploadResult.files && fileUploadResult.files.length > 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: fileUploadResult.message,
+                });
+            }
+    
+            if (!isUpdated) {
+                return res.status(400).json({ success: false, message: "No image updated" });
+            }
+    
+            await existingContactUsDetails.save();
+    
+            return res.status(200).json({
+                success: true,
+                message: "Image updated successfully",
+                data: existingContactUsDetails,
+            });
+        } catch (error) {
+            return res.status(500).json({
+                success: false,
+                message: error instanceof Error ? error.message : "An unknown error occurred",
+            });
+        }
+    }
+    
+    
     
 
 }

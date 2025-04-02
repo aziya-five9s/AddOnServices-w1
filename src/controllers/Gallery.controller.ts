@@ -176,9 +176,6 @@ export class GalleryController {
             const { morningMeal, afternoonMeal, eveningMeal, title: titleString } = req.body;
             const title = titleString ? JSON.parse(titleString) : [];
             
-
-
-
             if (!existingGalleryDetails) {
                 return res.status(404).json({
                     success: false,
