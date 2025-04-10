@@ -59,76 +59,111 @@ export class SubMenuController {
             const tenantInfo = await TenantInfo.findOne({ where: { tenantId } });
 
             if (!tenantInfo) {
-            // if (!tenantId || typeof tenantId !== "string" || tenantId.trim() === ""){
                 return res.status(404).json({
                     success: false,
                     message: "Tenant Not Found"
                 });
-        }
+            }
 
             // Check if submenu already exists for the tenant
             let subMenuInfo = await SubMenu.findOne({ where: { tenantId } });
 
-        if (!subMenuInfo) {
-            // If no submenu exists, create a new one
-            subMenuInfo = new SubMenu();
-            subMenuInfo.tenantId = tenantId;
-            subMenuInfo.heading = heading;
-            subMenuInfo.subMenu = []; // Initialize subMenu array
-        }
-        else {
-            if (heading && heading.trim() !== "") {
+            if (!subMenuInfo) {
+                // If no submenu exists, create a new one
+                subMenuInfo = new SubMenu();
+                subMenuInfo.tenantId = tenantId;
                 subMenuInfo.heading = heading;
+                subMenuInfo.subMenu = []; // Initialize subMenu array
             }
-        }
-        if (filePath && filePath.status == true) {
-            // Append new submenu entry
-            subMenuInfo.subMenu.push({
-                title,
-                imagePath: filePath.fpath,
-                imgId: filePath.docId,
-                updatedAt: new Date(),
-                uploadedBy: userData.userName
+            else {
+                if (heading && heading.trim() !== "") {
+                    subMenuInfo.heading = heading;
+                }
+            }
+            if (filePath && filePath.status == true) {
+                // Append new submenu entry
+                subMenuInfo.subMenu.push({
+                    title,
+                    imagePath: filePath.fpath,
+                    imgId: filePath.docId,
+                    updatedAt: new Date(),
+                    uploadedBy: userData.userName
+                });
+            }
+
+            // Save the updated submenu
+            await subMenuInfo.save();
+
+            return res.status(200).json({
+                success: true,
+                message: subMenuInfo?.id ? "Submenu updated successfully" : "New submenu created successfully"
+            });
+
+        } catch (error) {
+            return res.status(500).json({
+                success: false,
+                message: (error as Error).message
             });
         }
-
-        // Save the updated submenu
-        await subMenuInfo.save();
-
-        return res.status(200).json({
-            success: true,
-            message: subMenuInfo?.id ? "Submenu updated successfully" : "New submenu created successfully"
-        });
-
-    } catch(error) {
-        return res.status(500).json({
-            success: false,
-            message: (error as Error).message
-        });
     }
-}
 
+
+     //original code
+    // static async getSubMenuData(req: Request, res: Response) {
+    //     try {
+    //         const { id } = req.params
+    //         const repo = AppDataSource.getRepository(SubMenu)
+
+    //         // Fetch all basicDetails data, applying filters from query parameters if provided
+
+    //         //relations----> means we get the overall data of tenant which was use for join
+    //         //select=--> we use to show fields (i require few fields i take that in select)
+    //         // const subMenuData = await repo.find({ where: { ...req.query}, relations:["tenant"], select:["heading", "subMenu"] });
+    //         const subMenuData = await repo.find({ where: { ...req.query }, relations: ["tenant"] });// original query
+        
+    //         return res.status(200).json({
+    //             success: true,
+    //             data: subMenuData
+    //         });
+    //     } catch (error) {
+    //         return res.status(500).json({
+    //             success: false,
+    //             message: (error instanceof Error) ? error.message : "An unknown error occurred"
+    //         });
+    //     }
+    // }
 
     static async getSubMenuData(req: Request, res: Response) {
-    try {
-        const repo = AppDataSource.getRepository(SubMenu)
-        // Fetch all basicDetails data, applying filters from query parameters if provided
+        try {
+            const { id } = req.params
+            const repo = AppDataSource.getRepository(SubMenu)
 
-        //relations----> means we get the overall data of tenant which was use for join
-        //select=--> we use to show fields (i require few fields i take that in select)
-        // const subMenuData = await repo.find({ where: { ...req.query}, relations:["tenant"], select:["heading", "subMenu"] });
-        const subMenuData = await repo.find({ where: { ...req.query }, relations: ["tenant"] });
-        return res.status(200).json({
-            success: true,
-            data: subMenuData
-        });
-    } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: (error instanceof Error) ? error.message : "An unknown error occurred"
-        });
+            // Fetch all basicDetails data, applying filters from query parameters if provided
+
+            //relations----> means we get the overall data of tenant which was use for join
+            //select=--> we use to show fields (i require few fields i take that in select)
+            // const subMenuData = await repo.find({ where: { ...req.query}, relations:["tenant"], select:["heading", "subMenu"] });
+            // const subMenuData = await repo.find({ where: { ...req.query }, relations: ["tenant"] });// original 
+            const subMenuData = await repo.find({ where: { id, ...req.query }, relations: ["tenant"] });
+            // Check if data exists
+            // if (!subMenuData.length) {
+            //     return res.status(404).json({
+            //         success: false,
+            //         message: "Invalid Submenu ID"
+            //     });
+            // }
+            return res.status(200).json({
+                success: true,
+                data: subMenuData
+            });
+        } catch (error) {
+            return res.status(500).json({
+                success: false,
+                message: (error instanceof Error) ? error.message : "An unknown error occurred"
+            });
+        }
     }
-}
+
 
     //code self
 
@@ -148,42 +183,42 @@ export class SubMenuController {
     //     }
     // }
 
-// doubt new
+    // doubt new
     static async deleteSubMenuData(req: Request, res: Response) {
-    try {
-        const { id, imgId } = req.params;
-        const item = await SubMenu.findOneBy({ id });
+        try {
+            const { id, imgId } = req.params;
+            const item = await SubMenu.findOneBy({ id });
 
-        if (!item) {
-            return res.status(404).json({ success: false, message: "SubMenu item not found" });
+            if (!item) {
+                return res.status(404).json({ success: false, message: "SubMenu item not found" });
+            }
+
+            const updatedSubMenu = item.subMenu.filter((el) => el.imgId !== imgId);
+
+            if (updatedSubMenu.length === item.subMenu.length) {
+                return res.status(404).json({ success: false, message: `Image with imgId ${imgId} not found` });
+            }
+
+            item.subMenu = updatedSubMenu;
+            await item.save();
+
+            return res.status(200).json({
+                success: true,
+                message: `Image with imgId ${imgId} deleted successfully`,
+                data: item
+            });
+
+        } catch (error) {
+            return res.status(500).json({
+                success: false,
+                message: "Error deleting image",
+                error: error instanceof Error ? error.message : error
+            });
         }
-
-        const updatedSubMenu = item.subMenu.filter((el) => el.imgId !== imgId);
-
-        if (updatedSubMenu.length === item.subMenu.length) {
-            return res.status(404).json({ success: false, message: `Image with imgId ${imgId} not found` });
-        }
-
-        item.subMenu = updatedSubMenu;
-        await item.save();
-
-        return res.status(200).json({
-            success: true,
-            message: `Image with imgId ${imgId} deleted successfully`,
-            data: item
-        });
-
-    } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: "Error deleting image",
-            error: error instanceof Error ? error.message : error
-        });
     }
-}
 
 
-   // code self
+    // code self
     // static async updateSubMenuData1(req: Request, res: Response) {
     //     try {
     //         const filePath = await CommonController.uploadDocument(req, res)
@@ -232,73 +267,157 @@ export class SubMenuController {
     // }
 
 
- //doubt new
+
+
+    
+    //original code
+    // static async updateSubMenuData(req: Request, res: Response) {
+    //     try {
+    //         const filePath = await CommonController.uploadDocument(req, res);
+    //         const repo = AppDataSource.getRepository(SubMenu);
+    //         const { heading, tenantId, title, imgId } = req.body;
+    //         const { id } = req.params;
+
+    //         if (!id) {
+    //             return res.status(404).json({
+    //                 success: false,
+    //                 message: "Id not found",
+    //             });
+    //         }
+
+    //         const tenantinfo = await TenantInfo.findOne({ where: { tenantId } });
+    //         const existingSubMenuDetails = await repo.findOne({ where: { id } });
+
+    //         if (!existingSubMenuDetails) {
+    //             return res.status(404).json({
+    //                 success: false,
+    //                 message: "SubMenu data not found",
+    //             });
+    //         }
+    //         const imageInfoIndex = existingSubMenuDetails.subMenu.findIndex((el) => el.imgId == imgId);
+
+
+    //         if (imageInfoIndex !== -1) {
+    //             existingSubMenuDetails.subMenu[imageInfoIndex] = {
+    //                 ...existingSubMenuDetails.subMenu[imageInfoIndex],
+    //                 title: title !== undefined && title !== "" ? title : existingSubMenuDetails.subMenu[imageInfoIndex].title,
+    //                 updatedAt: new Date(),
+    //                 uploadedBy: userData.userName
+    //             };
+
+    //             if (filePath && filePath.status == true) {
+    //                 existingSubMenuDetails.subMenu[imageInfoIndex] = {
+    //                     ...existingSubMenuDetails.subMenu[imageInfoIndex],
+    //                     imagePath: filePath.fpath,
+    //                     imgId: filePath.docId,
+    //                 };
+    //             }
+    //         } else {
+    //             existingSubMenuDetails.subMenu.push({
+    //                 title: title,
+    //                 imagePath: filePath?.fpath || null,
+    //                 imgId: filePath?.docId || imgId,
+    //                 updatedAt: new Date(),
+    //                 uploadedBy: userData.userName,
+    //             });
+    //         }
+    //         existingSubMenuDetails.heading = heading !== undefined && heading !== "" ? heading : existingSubMenuDetails.heading;
+    //         existingSubMenuDetails.tenant = tenantinfo;
+
+    //         await existingSubMenuDetails.save();
+
+    //         return res.status(200).json({
+    //             success: true,
+    //             message: "SubMenu data updated successfully",
+    //             data: existingSubMenuDetails,
+    //         });
+
+    //     } catch (error) {
+    //         return res.status(500).json({
+    //             success: false,
+    //             message: error instanceof Error ? error.message : "An unknown error occurred",
+    //         });
+    //     }
+    // }
+
+
     static async updateSubMenuData(req: Request, res: Response) {
-    try {
-        const filePath = await CommonController.uploadDocument(req, res);
-        const repo = AppDataSource.getRepository(SubMenu);
-        const { heading, tenantId, title, imgId } = req.body;
-        const { id } = req.params;
+        try {
+            const filePath = await CommonController.uploadDocument(req, res);
+            const repo = AppDataSource.getRepository(SubMenu);
+            const { heading, tenantId, title, imgId } = req.body;
+            const { id } = req.params;
 
-        if (!id) {
-            return res.status(404).json({
-                success: false,
-                message: "Id not found",
-            });
-        }
+            if (!id) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Id not found",
+                });
+            }
 
-        const tenantinfo = await TenantInfo.findOne({ where: { tenantId } });
-        const existingSubMenuDetails = await repo.findOne({ where: { id } });
+            const tenantinfo = await TenantInfo.findOne({ where: { tenantId } });
+            const existingSubMenuDetails = await repo.findOne({ where: { id } });
 
-        if (!existingSubMenuDetails) {
-            return res.status(404).json({
-                success: false,
-                message: "SubMenu data not found",
-            });
-        }
-        const imageInfoIndex = existingSubMenuDetails.subMenu.findIndex((el) => el.imgId == imgId);
+            if (!existingSubMenuDetails) {
+                return res.status(404).json({
+                    success: false,
+                    message: "SubMenu data not found",
+                });
+            }
+            // if (!imgId) {
+            //     return res.status(404).json({
+            //         success: false,
+            //         message: "No Image ID given",
+            //     });
+            // }
+            const imageInfoIndex = existingSubMenuDetails.subMenu.findIndex((el) => el.imgId == imgId);
+            if (imageInfoIndex === -1) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Image with given imgId not found in submenu",
+                });
+            }
 
-        if (imageInfoIndex !== -1) {
-            existingSubMenuDetails.subMenu[imageInfoIndex] = {
-                ...existingSubMenuDetails.subMenu[imageInfoIndex],
-                title: title !== undefined && title !== "" ? title : existingSubMenuDetails.subMenu[imageInfoIndex].title,
-                updatedAt: new Date(),
-                uploadedBy: userData.userName
-            };
-
-            if (filePath && filePath.status == true) {
+            if (imageInfoIndex !== -1) {
                 existingSubMenuDetails.subMenu[imageInfoIndex] = {
                     ...existingSubMenuDetails.subMenu[imageInfoIndex],
-                    imagePath: filePath.fpath,
-                    imgId: filePath.docId,
+                    title: title !== undefined && title !== "" ? title : existingSubMenuDetails.subMenu[imageInfoIndex].title,
+                    updatedAt: new Date(),
+                    uploadedBy: userData.userName
                 };
+
+                if (filePath && filePath.status == true) {
+                    existingSubMenuDetails.subMenu[imageInfoIndex] = {
+                        ...existingSubMenuDetails.subMenu[imageInfoIndex],
+                        imagePath: filePath.fpath,
+                        imgId: filePath.docId,
+                    };
+                }
+            } else {
+                existingSubMenuDetails.subMenu.push({
+                    title: title,
+                    imagePath: filePath?.fpath || null,
+                    imgId: filePath?.docId || imgId,
+                    updatedAt: new Date(),
+                    uploadedBy: userData.userName,
+                });
             }
-        } else {
-            existingSubMenuDetails.subMenu.push({
-                title: title,
-                imagePath: filePath?.fpath || null,
-                imgId: filePath?.docId || imgId,
-                updatedAt: new Date(),
-                uploadedBy: userData.userName,
+            existingSubMenuDetails.heading = heading !== undefined && heading !== "" ? heading : existingSubMenuDetails.heading;
+            existingSubMenuDetails.tenant = tenantinfo;
+
+            await existingSubMenuDetails.save();
+
+            return res.status(200).json({
+                success: true,
+                message: "SubMenu data updated successfully",
+                data: existingSubMenuDetails,
+            });
+
+        } catch (error) {
+            return res.status(500).json({
+                success: false,
+                message: error instanceof Error ? error.message : "An unknown error occurred",
             });
         }
-        existingSubMenuDetails.heading = heading !== undefined && heading !== "" ? heading : existingSubMenuDetails.heading;
-        existingSubMenuDetails.tenant = tenantinfo;
-
-        await existingSubMenuDetails.save();
-
-        return res.status(200).json({
-            success: true,
-            message: "SubMenu data updated successfully",
-            data: existingSubMenuDetails,
-        });
-
-    } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: error instanceof Error ? error.message : "An unknown error occurred",
-        });
     }
-}
-    
 }
