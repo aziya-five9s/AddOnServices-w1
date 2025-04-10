@@ -59,6 +59,14 @@ export class TenantInfoController {
             const repo = AppDataSource.getRepository(TenantInfo)
             // Fetch all TenantInfo data, applying filters from query parameters if provided
             const TenantInfoData = await repo.find({ where: { id, ...req.query } });
+
+            // Check if data exists
+            if (!TenantInfoData.length) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Invalid tenant ID"
+                });
+            }
             return res.status(200).json({
                 success: true,
                 data: TenantInfoData
@@ -195,7 +203,7 @@ export class TenantInfoController {
 
                     title: title !== undefined && title !== "" ? title : ChefDetails.heroSection[index].title,
                     subTitle: subTitle !== undefined && subTitle !== "" ? subTitle : ChefDetails.heroSection[index].subTitle,
-                  
+
                     // title: title,
                     // subTitle: subTitle,
                     updatedAt: new Date(),
@@ -226,18 +234,58 @@ export class TenantInfoController {
         }
     }
 
+    // static async deleteHeroSectionDataorg(req: Request, res: Response) {
+    //     try {
+    //         const { imgid, id } = req.params
+    //         const ChefDetails = await TenantInfo.findOne({ where: { id } })
+    //         // Filter out the image object by imgId
+    //         ChefDetails.heroSection = ChefDetails.heroSection?.filter(item => item.imgId !== imgid) || [];
+
+    //         // Save back to the database
+    //         await ChefDetails.save();
+    //         return res.status(201).json({
+    //             success: true, message: "Data Deleted Successfully"
+    //         })
+    //     } catch (error) {
+    //         return res.status(500).json({
+    //             success: false,
+    //             message: error instanceof Error ? error.message : "An unknown error occurred",
+    //         });
+    //     }
+    // }
+
     static async deleteHeroSectionData(req: Request, res: Response) {
         try {
-            const { imgid, id } = req.params
-            const ChefDetails = await TenantInfo.findOne({ where: { id } })
-            // Filter out the image object by imgId
-            ChefDetails.heroSection = ChefDetails.heroSection?.filter(item => item.imgId !== imgid) || [];
+            const { imgid, id } = req.params;
+            const ChefDetails = await TenantInfo.findOne({ where: { id } });
 
-            // Save back to the database
+            if (!ChefDetails) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Tenant not found",
+                });
+            }
+
+            // Check if the imgId exists in heroSection
+            const originalLength = ChefDetails.heroSection?.length || 0;
+            const filteredHeroSection = ChefDetails.heroSection?.filter(item => item.imgId !== imgid) || [];
+
+            if (filteredHeroSection.length === originalLength) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Image ID not found in heroSection",
+                });
+            }
+
+            // Save the updated array
+            ChefDetails.heroSection = filteredHeroSection;
             await ChefDetails.save();
+
             return res.status(201).json({
-                success: true, message: "Data Deleted Successfully"
-            })
+                success: true,
+                message: "Data Deleted Successfully"
+            });
+
         } catch (error) {
             return res.status(500).json({
                 success: false,
@@ -246,24 +294,58 @@ export class TenantInfoController {
         }
     }
 
+
+
+    //original code
+    // static async getHeroSectionData(req: Request, res: Response) {
+    //     try {
+    //         // const { tenantId, id} = req.params
+    //         const { tenantId, id, imgId } = req.params
+    //         const ChefDetails = await TenantInfo.findOne({ where: { tenantId: tenantId } })
+    //         if (id) {
+    //             const heroSection = ChefDetails?.heroSection.find((el) => el.imgId === id)
+    //             // const heroSection = ChefDetails?.heroSection.find((el) => el.imgId === imgId)
+    //             return res.status(200).json({
+    //                 success: true, data: heroSection ? heroSection : {}
+    //             })
+    //         }
+
+    //         const heroSection = ChefDetails?.heroSection
+    //         return res.status(200).json({
+    //             success: true, data: heroSection ? heroSection : {}
+    //         })
+    //     } catch (error) {
+    //         return res.status(500).json({
+    //             success: false,
+    //             message: error instanceof Error ? error.message : "An unknown error occurred",
+    //         });
+    //     }
+    // }
+
     static async getHeroSectionData(req: Request, res: Response) {
         try {
             // const { tenantId, id} = req.params
             const { tenantId, id, imgId } = req.params
             const ChefDetails = await TenantInfo.findOne({ where: { tenantId: tenantId } })
-
-            if (id) {
-                const heroSection = ChefDetails?.heroSection.find((el) => el.imgId === id)
-                // const heroSection = ChefDetails?.heroSection.find((el) => el.imgId === imgId)
+            if (ChefDetails) {
+                if (id) {
+                    const heroSection = ChefDetails?.heroSection.find((el) => el.imgId === id)
+                    // const heroSection = ChefDetails?.heroSection.find((el) => el.imgId === imgId)
+                    return res.status(200).json({
+                        success: true, data: heroSection ? heroSection : {}
+                    })
+                }
+                const heroSection = ChefDetails?.heroSection
                 return res.status(200).json({
                     success: true, data: heroSection ? heroSection : {}
                 })
             }
-
-            const heroSection = ChefDetails?.heroSection
-            return res.status(200).json({
-                success: true, data: heroSection ? heroSection : {}
-            })
+            else {
+                return res.status(500).json({
+                    success: false,
+                    message: "Tenant doesnot Exist"
+                })
+            }
         } catch (error) {
             return res.status(500).json({
                 success: false,
@@ -285,17 +367,13 @@ export class TenantInfoController {
             if (!filePath || filePath.status === false) {
                 return res.status(400).json({ success: false, message: "No file uploaded!" })
             }
-
             const { tenantId, title, description } = req.body
             const AboutSectionDetails = await TenantInfo.findOne({ where: { id, tenantId: tenantId } })
-
-
             if (AboutSectionDetails == undefined) {
                 return res.status(409).json({
                     success: false, message: "Tenant Not Found"
                 })
             }
-
             AboutSectionDetails.aboutSection =
             {
                 title: title,
