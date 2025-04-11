@@ -56,14 +56,23 @@ export class SubMenuController {
             const { heading, tenantId, title } = req.body;
 
             // Check if tenant exists
-            const tenantInfo = await TenantInfo.findOne({ where: { tenantId } });
+            const tenantInfo = await TenantInfo.findOne({ where: { tenantId:tenantId} });
 
-            if (!tenantInfo) {
+            // if (!tenantInfo) {
+
+            if (!tenantInfo === undefined || tenantInfo === null || tenantId.toString().trim() === "") {
                 return res.status(404).json({
                     success: false,
                     message: "Tenant Not Found"
                 });
             }
+
+            // if (!tenantId?.toString().trim()) {
+            //     return res.status(400).json({
+            //         success: false,
+            //         message: "tenantId is required!"
+            //     });
+            // }
 
             // Check if submenu already exists for the tenant
             let subMenuInfo = await SubMenu.findOne({ where: { tenantId } });
@@ -108,7 +117,7 @@ export class SubMenuController {
     }
 
 
-     //original code
+    //original code
     // static async getSubMenuData(req: Request, res: Response) {
     //     try {
     //         const { id } = req.params
@@ -120,7 +129,7 @@ export class SubMenuController {
     //         //select=--> we use to show fields (i require few fields i take that in select)
     //         // const subMenuData = await repo.find({ where: { ...req.query}, relations:["tenant"], select:["heading", "subMenu"] });
     //         const subMenuData = await repo.find({ where: { ...req.query }, relations: ["tenant"] });// original query
-        
+
     //         return res.status(200).json({
     //             success: true,
     //             data: subMenuData
@@ -269,7 +278,7 @@ export class SubMenuController {
 
 
 
-    
+
     //original code
     // static async updateSubMenuData(req: Request, res: Response) {
     //     try {

@@ -37,9 +37,16 @@ export class ChefMenuController {
         }
     }
     static async getChefMenuData(req: Request, res: Response) {
-        try {
+        try {const { id } = req.params
             const repo = AppDataSource.getRepository(ChefMenu)
-            const basicChefmenuData = await repo.find({ where: { ...req.query } });
+            // const basicChefmenuData = await repo.find({ where: { ...req.query } });
+            const basicChefmenuData = await repo.find({ where: { id,...req.query } });
+            if (!basicChefmenuData.length) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Invalid tenant ID"
+                });
+            }
             return res.status(200).json({
                 success: true,
                 data: basicChefmenuData

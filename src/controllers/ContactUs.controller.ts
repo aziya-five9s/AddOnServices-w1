@@ -130,6 +130,13 @@ export class ContactUsController {
             const { id } = req.params
             const repo = AppDataSource.getRepository(ContactUs)
             const contactUsData = await repo.find({ where: { id } });
+
+            if (!contactUsData.length) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Invalid tenant ID"
+                });
+            }
             return res.status(200).json({
                 success: true,
                 data: contactUsData
