@@ -25,30 +25,21 @@ export class GalleryController {
                     success: false, message: "Tenant Not Found"
                 })
             }
-            let galleryinfo = await Gallery.findOne({ where: { tenantId } });
+            
+            const repo = new Gallery()
+            // Format uploaded images
+            const uploadedImages = filePath.files.map((file, index) => ({
+                title: title[index],
+                imagePath: file.fpath,
+                imgId: file.docId,
+                uploadedAt: new Date(),
+                uploadedBy: userData.userName
+            }));
 
-            if (!galleryinfo) {
-                const repo = new Gallery()
-                // Format uploaded images
-                const uploadedImages = filePath.files.map((file, index) => ({
-                    title: title[index],
-                    imagePath: file.fpath,
-                    imgId: file.docId,
-                    uploadedAt: new Date(),
-                    uploadedBy: userData.userName
-                }));
-    
-                repo.tenantId = tenantId
-                repo.morningMeal = uploadedImages
-                await repo.save();
-                return res.status(200).json({ success: true, message: "Gallery added successfully" });
-             }
-             else{
-                res.status(404).json({ success: false, message: "Gallery Already Exists" });
-             }
-
-
-           
+            repo.tenantId = tenantId
+            repo.morningMeal = uploadedImages
+            await repo.save();
+            return res.status(200).json({ success: true, message: "Gallery added successfully" });
         }
         catch (error) {
             return res.status(500).json({
@@ -266,30 +257,30 @@ export class GalleryController {
     // static async updateGalleryData(req: Request, res: Response) {
     //     try {
     //         const { id } = req.params;
-
+    
     //         const repo = AppDataSource.getRepository(Gallery);
     //         const existingGalleryDetails = await repo.findOne({ where: { id } });
-
+    
     //         if (!existingGalleryDetails) {
     //             return res.status(404).json({
     //                 success: false,
     //                 message: "Gallery data not found",
     //             });
     //         }
-
+    
     //         // Upload new file if provided
     //         let uploadedFileData = null;
     //         const fileUploadResult = await CommonController.uploadDocuments(req, res);
     //         const { morningMeal, afternoonMeal, eveningMeal, title: titleString, imgId } = req.body;
     //         const title = titleString ? JSON.parse(titleString) : [];
-
+    
     //         if (!imgId) {
     //             return res.status(400).json({
     //                 success: false,
     //                 message: "imgId is required to update specific image data",
     //             });
     //         }
-
+    
     //         if (fileUploadResult.status && fileUploadResult.files.length > 0) {
     //             const file = fileUploadResult.files[0];
     //             uploadedFileData = {
@@ -298,7 +289,7 @@ export class GalleryController {
     //                 uploadedBy: userData.userName
     //             };
     //         }
-
+    
     //         // Function to update a specific image in the array
     //         const updateImageInArray = (imagesArray: any[] = []) => {
     //             return imagesArray.map((img) => {
@@ -312,28 +303,28 @@ export class GalleryController {
     //                 return img;
     //             });
     //         };
-
+    
     //         // Update image in the correct meal array
     //         if (morningMeal === true || morningMeal === "true") {
     //             existingGalleryDetails.morningMeal = updateImageInArray(existingGalleryDetails.morningMeal);
     //         }
-
+    
     //         if (afternoonMeal === true || afternoonMeal === "true") {
     //             existingGalleryDetails.afternoonMeal = updateImageInArray(existingGalleryDetails.afternoonMeal);
     //         }
-
+    
     //         if (eveningMeal === true || eveningMeal === "true") {
     //             existingGalleryDetails.eveningMeal = updateImageInArray(existingGalleryDetails.eveningMeal);
     //         }
-
+    
     //         // Save the updated gallery
     //         await existingGalleryDetails.save();
-
+    
     //         return res.status(200).json({
     //             success: true,
     //             message: "Gallery image updated successfully",
     //         });
-
+    
     //     } catch (error) {
     //         return res.status(500).json({
     //             success: false,
@@ -346,23 +337,27 @@ export class GalleryController {
     static async updateGalleryData(req: Request, res: Response) {
         try {
             const { id } = req.params;
-
+    
             const repo = AppDataSource.getRepository(Gallery);
             const existingGalleryDetails = await repo.findOne({ where: { id } });
-
+    
             if (!existingGalleryDetails) {
                 return res.status(404).json({
                     success: false,
                     message: "Gallery data not found",
                 });
             }
-
+    
             const fileUploadResult = await CommonController.uploadDocuments(req, res);
             const { morningMeal, afternoonMeal, eveningMeal, title: titleString, imgId } = req.body;
             const title = titleString ? JSON.parse(titleString) : [];
-
+    
+            const userData = {
+                userName: "admin" // Replace with actual user session if needed
+            };
+    
             let uploadedFileData = null;
-
+    
             if (fileUploadResult.status && fileUploadResult.files.length > 0) {
                 const file = fileUploadResult.files[0];
                 uploadedFileData = {
@@ -371,54 +366,54 @@ export class GalleryController {
                     uploadedBy: userData.userName
                 };
             }
-
+    
             // New image object to insert or update
             const newImageObject = {
                 imgId: imgId || Date.now().toString(), // Generate imgId if not provided
                 ...(title.length > 0 && { title: title[0] }),
                 ...(uploadedFileData && uploadedFileData)
             };
-
+    
             // Function to update existing or add new image
             const updateOrInsertImage = (imagesArray: any[] = []) => {
                 const arr = Array.isArray(imagesArray) ? [...imagesArray] : [];
-
+    
                 const index = imgId ? arr.findIndex(img => img.imgId === imgId) : -1;
-
+    
                 if (index !== -1) {
                     arr[index] = { ...arr[index], ...newImageObject };
                 } else {
                     arr.push(newImageObject);
                 }
-
+    
                 return arr;
             };
-
+    
             // Ensure arrays are always initialized
             existingGalleryDetails.morningMeal = existingGalleryDetails.morningMeal || [];
             existingGalleryDetails.afternoonMeal = existingGalleryDetails.afternoonMeal || [];
             existingGalleryDetails.eveningMeal = existingGalleryDetails.eveningMeal || [];
-
+    
             // Apply updates
             if (morningMeal === true || morningMeal === "true") {
                 existingGalleryDetails.morningMeal = updateOrInsertImage(existingGalleryDetails.morningMeal);
             }
-
+    
             if (afternoonMeal === true || afternoonMeal === "true") {
                 existingGalleryDetails.afternoonMeal = updateOrInsertImage(existingGalleryDetails.afternoonMeal);
             }
-
+    
             if (eveningMeal === true || eveningMeal === "true") {
                 existingGalleryDetails.eveningMeal = updateOrInsertImage(existingGalleryDetails.eveningMeal);
             }
-
+    
             await repo.save(existingGalleryDetails);
-
+    
             return res.status(200).json({
                 success: true,
                 message: "Gallery image updated successfully",
             });
-
+    
         } catch (error) {
             return res.status(500).json({
                 success: false,
@@ -426,17 +421,17 @@ export class GalleryController {
             });
         }
     }
+    
+    
+    
+ 
+    
 
 
-
-
-
-
-
-
-
-
-
+    
+    
+    
+    
 
     static async updateGalleryImage(req: Request, res: Response) {
         try {
