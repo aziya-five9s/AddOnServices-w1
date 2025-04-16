@@ -4,6 +4,7 @@ import { AnyObject } from "../types/common"
 import { CommonController } from "./common.controller"
 import { Gallery } from "../entity/GallerySection.entity"
 import { TenantInfo } from "../entity/TenantInfo.entity"
+import { v4 as uuidv4 } from "uuid"
 
 const userData = { tenantId: "tenant-001", userId: "user-001", userName: "John Doe", userEmail: "johndoe@email.com" }
 export class GalleryController {
@@ -374,7 +375,8 @@ export class GalleryController {
 
             // New image object to insert or update
             const newImageObject = {
-                imgId: imgId || Date.now().toString(), // Generate imgId if not provided
+                // imgId: imgId || Date.now().toString(), // Generate imgId if not provided
+                imgId: imgId || uuidv4() , // Generate imgId if not provided
                 ...(title.length > 0 && { title: title[0] }),
                 ...(uploadedFileData && uploadedFileData)
             };
@@ -426,16 +428,6 @@ export class GalleryController {
             });
         }
     }
-
-
-
-
-
-
-
-
-
-
 
 
     static async updateGalleryImage(req: Request, res: Response) {
