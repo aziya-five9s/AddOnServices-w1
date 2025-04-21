@@ -19,13 +19,23 @@ export class TenantInfoController {
             }
             const { address, contactUs, policies, followUsOn, tenantName, tenantId } = req.body
 
+
+            //not working
             const tenantInfo = await TenantInfo.findOne({
                 // select: ["tenantId", "tenantName"], // Selecting required fields
                 where: [
-                    { tenantId: Raw((alias) => `${alias} = :tenantId`, { tenantId }) }, // Match tenantId exactly
+                    // { tenantId: Raw((alias) => `${alias} = :tenantId`, { tenantId }) }, // Match tenantId exactly
                     { tenantName: Raw((alias) => `LOWER(${alias}) = LOWER(:tenantName)`, { tenantName }) } // Case-insensitive match for tenantName
                 ]
             });
+
+
+            //aziya 
+            // const tenantInfo1 = await TenantInfo.findOne({
+            //     // select: ["tenantId", "tenantName"], // Selecting required fields
+            //     where:{tenantId:tenantId}
+            // });
+            //aziya check it
             if (tenantInfo) {
                 return res.status(409).json({
                     success: false, message: "Tenant already exist"
